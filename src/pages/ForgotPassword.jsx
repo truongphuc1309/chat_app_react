@@ -55,7 +55,7 @@ function ForgotPassword() {
 
     return (
         <div className="w-screen h-screen bg-[var(--primary)] flex items-center justify-center">
-            <form className=" bg-white p-12 shadow-[#00000042] shadow-xl w-[460px]">
+            <form className=" bg-white p-12 shadow-[#00000042] shadow-xl sm:w-[460px] sm:h-auto h-[100%] w-[100%]">
                 <h1 className="text-[var(--primary)] text-center font-bold text-4xl mb-8">
                     Forgot Password
                 </h1>

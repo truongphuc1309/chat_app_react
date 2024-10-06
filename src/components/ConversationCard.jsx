@@ -1,17 +1,19 @@
 import { Avatar, AvatarGroup } from '@mui/material';
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { AppContext } from '../contexts/AppContext';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import messageService from '../services/MessageService';
 import { useCookies } from 'react-cookie';
 
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { formatTime } from '../utils/formatTime';
 import WebSocketService from '../services/WebSocketService';
+import { ConversationContext } from '../contexts/ConversationContext';
 
 function ConversationCard({ data }) {
     const { user } = useContext(AppContext);
     const [cookies, setCookie] = useCookies(['user']);
+    const navigate = useNavigate();
     const { id } = useParams();
     const [name, setName] = useState('');
     const [isGroup, setIsGroup] = useState(false);
@@ -20,6 +22,8 @@ function ConversationCard({ data }) {
     const [active, setActive] = useState(false);
     const [lastMessage, setLastMessage] = useState(null);
     const [time, setTime] = useState('');
+    const { conversation } = useContext(ConversationContext);
+    const { setOpenConversationBox } = conversation;
     const wsRef = useRef();
 
     const getLastMessage = async () => {
@@ -30,7 +34,6 @@ function ConversationCard({ data }) {
         if (result.success) {
             const message = result.metaData;
             const updatedAt = message.updatedAt;
-            console.log(updatedAt);
             setTime(formatTime(updatedAt));
             if (message.active) setLastMessage(message.content);
             else {
@@ -38,6 +41,9 @@ function ConversationCard({ data }) {
                     setLastMessage('You unsent a message');
                 else setLastMessage(`${message.user.name} unsent a message`);
             }
+        } else {
+            setLastMessage('');
+            setTime('');
         }
     };
 
@@ -81,11 +87,14 @@ function ConversationCard({ data }) {
     }, [id, data]);
 
     return (
-        <Link
-            to={`/c/${data.id}`}
+        <div
             className={`flex min-h-[100px] justify-between items-center p-[16px_10px] cursor-pointer border-b-2 ${
                 active ? 'bg-[var(--primary)]' : ''
             }`}
+            onClick={() => {
+                navigate(`/c/${data.id}`);
+                setOpenConversationBox(true);
+            }}
         >
             <div className="w-[30%] flex items-center justify-center">
                 {isGroup && !avatar && (
@@ -163,7 +172,7 @@ function ConversationCard({ data }) {
                     </div>
                 )}
             </div>
-        </Link>
+        </div>
     );
 }
 

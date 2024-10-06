@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { Outlet, useParams } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import WebSocketService from '../services/WebSocketService';
+import { ConversationContext } from '../contexts/ConversationContext';
 
 function Contacts() {
     const { user } = useContext(AppContext);
@@ -15,14 +16,20 @@ function Contacts() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [data, setData] = useState([]);
+    const { conversation } = useContext(ConversationContext);
+    const { openConversationBox, setOpenConversationBox } = conversation;
     const wsRef = useRef(null);
+    const innerWidth = window.innerWidth;
 
     const getConversations = async () => {
+        if (innerWidth < 768) setOpenConversationBox(false);
+
         const result = await conversationService.getAllConversationsOfUser({
             token: cookies.token,
             page: page + 1,
             limit: 10,
         });
+
         if (result.success) {
             setTotalPages(result.metaData.totalPages);
             setData((pre) =>
@@ -39,6 +46,7 @@ function Contacts() {
             wsRef.current.disconnect();
             wsRef.current.unsubscribe();
         }
+
         wsRef.current = new WebSocketService({
             broker: `/topic/conversation/list/${user.id}`,
             onReceived: (mess) => {
@@ -79,7 +87,11 @@ function Contacts() {
 
     return (
         <div className="flex">
-            <div className="bg-[var(--secondary)] w-[30%] h-screen p-2 flex flex-col">
+            <div
+                className={`bg-[var(--secondary)] lg:w-[30%] md:w-[340px] md:block ${
+                    !openConversationBox ? 'block' : 'hidden'
+                } w-[100%] h-screen p-2 flex flex-col`}
+            >
                 <SideBarHeader />
                 <div
                     className="overflow-scroll flex flex-col no-scrollbar"

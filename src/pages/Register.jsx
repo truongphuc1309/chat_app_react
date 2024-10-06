@@ -98,7 +98,7 @@ function Register() {
 
     return (
         <div className="w-screen h-screen bg-[var(--primary)] flex items-center justify-center">
-            <form className=" bg-white w-[420px] p-10 shadow-[#00000042] shadow-xl">
+            <form className=" bg-white sm:w-[420px] sm:h-auto h-[100%] w-[100%] p-10 shadow-[#00000042] shadow-xl">
                 <h1 className="text-[var(--primary)] text-center font-bold text-4xl mb-8">
                     Register
                 </h1>

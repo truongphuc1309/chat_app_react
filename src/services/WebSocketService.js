@@ -14,9 +14,11 @@ class WebSocketService {
         this.onReceived = onReceived;
     }
 
-    connect() {
+    connect(token = '') {
         this.stomp.connect(
-            {},
+            {
+                Authorization: `Bearer ${token}`,
+            },
             () => {
                 if (this.broker && this.onReceived)
                     this.stomp.subscribe(this.broker, this.onReceived);
@@ -25,6 +27,7 @@ class WebSocketService {
                 console.log('Error connect to ws');
             }
         );
+        console.log(token);
     }
 
     send({ destination, message }) {

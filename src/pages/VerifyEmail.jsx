@@ -25,7 +25,7 @@ function VerifyEmail() {
         <div className="bg-[var(--primary)] h-screen flex justify-center items-center">
             {success || failed || <CircularProgress color="info" />}
             {success && (
-                <div className="bg-white h-[400px] w-[500px] rounded-xl p-[60px_40px] flex flex-col items-center">
+                <div className="bg-white sm:w-[500px] sm:h-[400px] h-[100%] w-[100%] rounded-xl p-[60px_40px] flex flex-col items-center">
                     <CheckCircleIcon
                         sx={{ fontSize: 120 }}
                         className="text-green-400"
@@ -49,7 +49,7 @@ function VerifyEmail() {
             )}
 
             {failed && (
-                <div className="bg-white h-[400px] w-[500px] rounded-xl p-[60px_40px] flex flex-col items-center justify-center">
+                <div className="bg-white shadow-xl sm:w-[500px] sm:h-[400px] h-[100%] w-[100%] rounded-xl p-[60px_40px] flex flex-col items-center justify-center">
                     <CancelIcon
                         sx={{ fontSize: 120 }}
                         className="text-red-400"

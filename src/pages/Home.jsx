@@ -11,6 +11,7 @@ function Home() {
 
     useEffect(() => {
         if (cookies.token == null) navigate('/login');
+        // else navigate('/c');
     }, []);
 
     return (

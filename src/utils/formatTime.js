@@ -1,5 +1,3 @@
-import { data } from 'autoprefixer';
-
 const formatTime = (string) => {
     const date = new Date(string);
 
@@ -26,6 +24,12 @@ const formatTime = (string) => {
             return `${now.getDate() - dayOfMonth} ${
                 now.getDate() - dayOfMonth > 1 ? 'days' : 'day'
             }`;
+
+        const minInfi = Math.floor(
+            (now.getTime() - date.getTime()) / (1000 * 60)
+        );
+
+        if (minInfi < 60) return `${minInfi} ${minInfi > 1 ? 'mins' : 'min'}`;
         else return `${hourInfi} ${hourInfi > 1 ? 'hours' : 'hour'}`;
     }
 

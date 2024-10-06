@@ -1,4 +1,4 @@
-import { Avatar, AvatarGroup, CircularProgress } from '@mui/material';
+import { Avatar, AvatarGroup, Button, CircularProgress } from '@mui/material';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import conversationService from '../services/ConversationService';
@@ -10,6 +10,9 @@ import messageService from '../services/MessageService';
 import MessageCard from './MessageCard';
 import WebSocketService from '../services/WebSocketService';
 import { formatLocalTime } from '../utils/formatTime';
+import WestIcon from '@mui/icons-material/West';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import { ConversationContext } from '../contexts/ConversationContext';
 
 function ConversationBox() {
     const [cookies, setCookie, removeCookie] = useCookies(['user']);
@@ -29,6 +32,9 @@ function ConversationBox() {
     const conversationIdRef = useRef('');
     const [openGroupInfo, setOpenGroupInfo] = useState(false);
     const [loading, setLoading] = useState(true);
+    const { conversation } = useContext(ConversationContext);
+    const { openConversationBox, setOpenConversationBox } = conversation;
+    const innerWidth = window.innerWidth;
     const wsRef = useRef(null);
 
     useEffect(() => {
@@ -44,7 +50,7 @@ function ConversationBox() {
             broker: `/topic/conversation/${id}`,
             onReceived: handleOnReceiveMessage,
         });
-        wsRef.current.connect();
+        wsRef.current.connect(cookies.token);
 
         return () => {
             if (wsRef.current) {
@@ -193,11 +199,37 @@ function ConversationBox() {
     };
 
     return (
-        <div className="relative h-screen flex-1 flex flex-col bg-[#ccc7f387]">
+        <div
+            className={`relative h-screen flex-1 ${
+                openConversationBox ? 'flex' : 'hidden'
+            } flex-col lg:b bg-[#ccc7f387]`}
+        >
             <div
                 className="h-[86px] bg-[var(--primary)] flex items-center p-[0_40px] cursor-pointer"
                 onClick={() => setOpenGroupInfo(true)}
             >
+                {innerWidth < 768 && (
+                    <Button
+                        color="secondary"
+                        sx={{
+                            color: '#fff',
+                            padding: '20px',
+                            marginLeft: '-20px',
+                            marginRight: '20px',
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenConversationBox(false);
+                        }}
+                    >
+                        <KeyboardArrowLeftIcon
+                            sx={{
+                                height: '3rem',
+                                width: '3rem',
+                            }}
+                        />
+                    </Button>
+                )}
                 <div className="w-min-[120px]">
                     {isGroup && !avatar && (
                         <AvatarGroup

@@ -1,24 +1,21 @@
-import React, { useState } from 'react';
-import conversationService from '../services/ConversationService';
+import React, { createContext, useState } from 'react';
 
 export const ConversationContext = createContext({});
 
 function ConversationProvider({ children }) {
-    const [data, setData] = useState({});
-
-    const getData = async () => {
-        const result = await conversationService.getConversationDetails({
-            token: cookies.token,
-            id,
-        });
-
-        if (result.success) {
-            setData(result.metaData);
-        }
-    };
+    const [openConversationBox, setOpenConversationBox] = useState(true);
 
     return (
-        <ConversationContext.Provider>{children}</ConversationContext.Provider>
+        <ConversationContext.Provider
+            value={{
+                conversation: {
+                    openConversationBox,
+                    setOpenConversationBox,
+                },
+            }}
+        >
+            {children}
+        </ConversationContext.Provider>
     );
 }
 
