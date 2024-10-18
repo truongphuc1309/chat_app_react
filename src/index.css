@@ -29,6 +29,10 @@ code {
     monospace;
 }
 
+#root {
+  overflow: hidden;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -11,7 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 
 function Profile() {
-    const { user } = useContext(AppContext);
+    const { user, profile } = useContext(AppContext);
+    const { setOpenProfile } = profile;
 
     const [email, setEmail] = useState('');
     const [avatar, setAvatar] = useState(null);
@@ -51,7 +52,7 @@ function Profile() {
     };
 
     return (
-        <div className="relative p-[16px_32px] flex flex-col items-center bg-[var(--third)] w-[30%] h-screen">
+        <div className="absolute top-0 left-0 bottom-0 w-[100%] p-[16px_32px] flex flex-col items-center bg-[var(--third)]">
             <Button
                 color="secondary"
                 className="w-[40px] h-[40px] top-2 left-2"
@@ -59,7 +60,7 @@ function Profile() {
                     position: 'absolute !important',
                 }}
                 onClick={(e) => {
-                    navigate(-1);
+                    setOpenProfile(false);
                 }}
             >
                 <ChevronLeftIcon

@@ -54,7 +54,8 @@ function SideBarHeader() {
         },
     };
 
-    const { user } = useContext(AppContext);
+    const { user, profile } = useContext(AppContext);
+    const { openProfile, setOpenProfile } = profile;
     const navigate = useNavigate();
     const [openGroupCreation, setOpenGroupCreation] = useState(false);
     const [openLogOutPopUp, setOpenLogOuPopUp] = useState(false);
@@ -172,7 +173,7 @@ function SideBarHeader() {
                         }}
                         onClick={(e) => {
                             setOpenMenu(false);
-                            navigate('/profile');
+                            setOpenProfile(true);
                         }}
                     >
                         <ListItemIcon>

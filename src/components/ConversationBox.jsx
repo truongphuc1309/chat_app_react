@@ -10,7 +10,6 @@ import messageService from '../services/MessageService';
 import MessageCard from './MessageCard';
 import WebSocketService from '../services/WebSocketService';
 import { formatLocalTime } from '../utils/formatTime';
-import WestIcon from '@mui/icons-material/West';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { ConversationContext } from '../contexts/ConversationContext';
 

@@ -16,14 +16,11 @@ function Contacts() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [data, setData] = useState([]);
-    const { conversation } = useContext(ConversationContext);
-    const { openConversationBox, setOpenConversationBox } = conversation;
+
     const wsRef = useRef(null);
     const innerWidth = window.innerWidth;
 
     const getConversations = async () => {
-        if (innerWidth < 768) setOpenConversationBox(false);
-
         const result = await conversationService.getAllConversationsOfUser({
             token: cookies.token,
             page: page + 1,
@@ -88,9 +85,7 @@ function Contacts() {
     return (
         <div className="flex">
             <div
-                className={`bg-[var(--secondary)] lg:w-[30%] md:w-[340px] md:block ${
-                    !openConversationBox ? 'block' : 'hidden'
-                } w-[100%] h-screen p-2 flex flex-col`}
+                className={`bg-[var(--secondary)] w-[100%] h-screen p-2 flex flex-col`}
             >
                 <SideBarHeader />
                 <div
@@ -108,7 +103,7 @@ function Contacts() {
                     )}
                 </div>
             </div>
-            <Outlet />
+            {/* <Outlet /> */}
         </div>
     );
 }
