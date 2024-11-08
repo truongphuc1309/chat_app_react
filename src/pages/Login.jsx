@@ -3,6 +3,7 @@ import { Button, CircularProgress, TextField } from '@mui/material';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import authService from '../services/AuthService';
 import { useCookies } from 'react-cookie';
+import userService from '../services/UserService';
 
 function Login() {
     const textStyle = {
@@ -37,8 +38,13 @@ function Login() {
     const [cookies, setCookie] = useCookies(['user']);
 
     useEffect(() => {
-        if (cookies.token) navigate('/');
+        getProfile();
     }, []);
+
+    const getProfile = async () => {
+        const result = await userService.getProfile(cookies.token);
+        if (result.success) navigate('/');
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -1,22 +1,31 @@
-import { Avatar, AvatarGroup, Button, CircularProgress } from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import {
+    Avatar,
+    AvatarGroup,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+} from '@mui/material';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useAppContext } from '../contexts/AppContext';
+import { ConversationContext } from '../contexts/ConversationContext';
 import conversationService from '../services/ConversationService';
-import { useCookies } from 'react-cookie';
-import { AppContext } from '../contexts/AppContext';
-import ConversationInfo from './ConversationInfo';
-import SendMessage from './SendMessage';
 import messageService from '../services/MessageService';
-import MessageCard from './MessageCard';
 import WebSocketService from '../services/WebSocketService';
 import { formatLocalTime } from '../utils/formatTime';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { ConversationContext } from '../contexts/ConversationContext';
+import ConversationInfo from './ConversationInfo';
+import LoadingFile from './LoadingFile';
+import MessageCard from './MessageCard';
+import SendMessage from './SendMessage';
 
 function ConversationBox() {
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
     const { id } = useParams();
-    const { user } = useContext(AppContext);
+    const { user, accessToken } = useAppContext();
 
     const [data, setData] = useState(null);
     const [name, setName] = useState('');
@@ -34,7 +43,10 @@ function ConversationBox() {
     const { conversation } = useContext(ConversationContext);
     const { openConversationBox, setOpenConversationBox } = conversation;
     const innerWidth = window.innerWidth;
+    const [viewImg, setViewImg] = useState(null);
     const wsRef = useRef(null);
+
+    const [loadingFiles, setLoadingFiles] = useState([]);
 
     useEffect(() => {
         getData();
@@ -49,7 +61,7 @@ function ConversationBox() {
             broker: `/topic/conversation/${id}`,
             onReceived: handleOnReceiveMessage,
         });
-        wsRef.current.connect(cookies.token);
+        wsRef.current.connect(accessToken);
 
         return () => {
             if (wsRef.current) {
@@ -80,7 +92,7 @@ function ConversationBox() {
 
     const getMessages = async () => {
         const result = await messageService.getAllMessagesOfConversation({
-            token: cookies.token,
+            token: accessToken,
             conversationId: id,
             page: pageRef.current,
             limit: 20,
@@ -129,11 +141,12 @@ function ConversationBox() {
 
     const getData = async () => {
         const result = await conversationService.getConversationDetails({
-            token: cookies.token,
+            token: accessToken,
             id,
         });
 
         if (result.success) {
+            console.log(result);
             setData(result.metaData);
             setIsGroup(result.metaData.group);
             setTotal(result.metaData.members.length);
@@ -176,7 +189,7 @@ function ConversationBox() {
             return (
                 <>
                     {presentTime && (
-                        <p className="text-center mt-6">
+                        <p className="text-center mt-6 mb-4">
                             {formatLocalTime(tempTime)}
                         </p>
                     )}
@@ -186,6 +199,7 @@ function ConversationBox() {
                         key={index}
                         isYour={e.user.id === user.id}
                         presentAvt={presentAvt}
+                        viewImg={setViewImg}
                     />
                     {index === arr.length - 1 && (
                         <p className="text-center mt-6">
@@ -271,6 +285,9 @@ function ConversationBox() {
                 className="flex-1 flex  flex-col-reverse p-[0_20px] overflow-y-scroll overflow-x-hidden no-scrollbar"
                 onScroll={handleScroll}
             >
+                {loadingFiles.map((e) => (
+                    <LoadingFile data={e} />
+                ))}
                 {handleRenderMessage(messages)}
                 {loading && (
                     <CircularProgress
@@ -279,7 +296,11 @@ function ConversationBox() {
                     />
                 )}
             </div>
-            <SendMessage setMessages={setMessages} ws={wsRef.current} />
+            <SendMessage
+                setMessages={setMessages}
+                ws={wsRef.current}
+                setLoadingFiles={setLoadingFiles}
+            />
 
             {openGroupInfo && (
                 <ConversationInfo
@@ -296,6 +317,47 @@ function ConversationBox() {
                     close={closeGroupInfo}
                 />
             )}
+
+            <Dialog open={viewImg}>
+                <DialogTitle className="flex items-center">
+                    <Avatar src={viewImg || ''} />
+                    <p className="text-[var(--primary)] text-[1.4rem] ml-4">
+                        {viewImg?.user.name}
+                    </p>
+                </DialogTitle>
+                <DialogContent>
+                    <img src={viewImg?.file.url} />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        sx={{
+                            width: '100%',
+                            padding: '20px',
+                        }}
+                        color="secondary"
+                        variant="outlined"
+                        onClick={(e) => {
+                            setViewImg(null);
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        sx={{
+                            width: '100%',
+                            padding: '20px',
+                        }}
+                        onClick={() => {}}
+                        variant="contained"
+                        color="secondary"
+                    >
+                        <a href={viewImg?.file.downloadUrl}>
+                            Download
+                            <DownloadIcon className="ml-2" />
+                        </a>
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

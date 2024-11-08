@@ -6,9 +6,9 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import userService from '../services/UserService';
-import UploadWidget from './UploadWidget';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
+import ChangeUserAvatar from './ChangeUserAvatar';
 
 function Profile() {
     const { user, profile } = useContext(AppContext);
@@ -23,8 +23,7 @@ function Profile() {
 
     const [cookies, setCookie, removeCookie] = useCookies(['user']);
     const oldName = useRef();
-
-    const navigate = useNavigate();
+    const [openChangeAvtPopUp, setOpenChangeAvtPopUp] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -45,10 +44,6 @@ function Profile() {
             setEdit(false);
             setName(result.metaData.name);
         }
-    };
-
-    const handleChangeAvatar = (url) => {
-        setAvatar(url);
     };
 
     return (
@@ -76,7 +71,12 @@ function Profile() {
                 overlap="circular"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 badgeContent={
-                    <UploadWidget changeAvatar={handleChangeAvatar} />
+                    <div
+                        className="bg-white p-2 rounded-full"
+                        onClick={(e) => setOpenChangeAvtPopUp(true)}
+                    >
+                        <EditIcon />
+                    </div>
                 }
             >
                 <Avatar
@@ -157,6 +157,13 @@ function Profile() {
                     )}
                 </div>
             </div>
+
+            <ChangeUserAvatar
+                open={openChangeAvtPopUp}
+                setStatus={setOpenChangeAvtPopUp}
+                reloadAvt={setAvatar}
+                haveAvt={avatar !== null}
+            />
         </div>
     );
 }

@@ -44,11 +44,27 @@ class UserService {
     static updateAvatar = async ({ token, avatar }) => {
         return await handleApiResponse(
             async () =>
-                await apiUrl.patch(
-                    'user/update',
+                await apiUrl.post(
+                    'user/avatar',
                     {
                         avatar,
                     },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                )
+        );
+    };
+
+    static removeAvatar = async ({ token }) => {
+        return await handleApiResponse(
+            async () =>
+                await apiUrl.post(
+                    'user/avatar/remove',
+                    {},
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,

@@ -9,21 +9,18 @@ import {
     Box,
     Avatar,
 } from '@mui/material';
-import React, { useState, useContext, useEffect } from 'react';
-import Chip from '@mui/material/Chip';
+import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 
 import userService from '../services/UserService';
-import SearchResultCard from './SearchResultCard';
-import { AppContext } from '../contexts/AppContext';
+import { useAppContext } from '../contexts/AppContext';
 import conversationService from '../services/ConversationService';
 import { useParams } from 'react-router-dom';
 
 function AddMembers({ members, open, close }) {
     const { id } = useParams();
     const [memberIds, setMemberIds] = useState([]);
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
-    const { user } = useContext(AppContext);
+    const { user, accessToken } = useAppContext();
     const [options, setOptions] = useState([]);
     const [selectedMemberIds, setSelectedMemberIds] = useState([]);
 
@@ -33,7 +30,7 @@ function AddMembers({ members, open, close }) {
 
     const getSearchData = async (value) => {
         const result = await userService.search({
-            token: cookies.token,
+            token: accessToken,
             key: value,
         });
         if (result.success) {
@@ -64,7 +61,7 @@ function AddMembers({ members, open, close }) {
         if (selectedMemberIds.length > 0) {
             selectedMemberIds.forEach(async (e) => {
                 await conversationService.addMember({
-                    token: cookies.token,
+                    token: accessToken,
                     conversationId: id,
                     userId: e,
                 });

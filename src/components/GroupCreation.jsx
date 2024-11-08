@@ -1,28 +1,24 @@
 import {
+    Autocomplete,
+    Avatar,
+    Box,
     Button,
     Dialog,
     DialogActions,
-    DialogTitle,
     DialogContent,
-    Autocomplete,
+    DialogTitle,
     TextField,
-    Box,
-    Avatar,
 } from '@mui/material';
-import React, { useState, useContext, useEffect, useRef } from 'react';
-import Chip from '@mui/material/Chip';
-import { useCookies } from 'react-cookie';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import userService from '../services/UserService';
-import SearchResultCard from './SearchResultCard';
+import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import conversationService from '../services/ConversationService';
+import userService from '../services/UserService';
 import WebSocketService from '../services/WebSocketService';
-import { useNavigate } from 'react-router-dom';
 
 function GroupCreation({ handleOpenGroupCreation }) {
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
-    const { user } = useContext(AppContext);
+    const { user, accessToken } = useContext(AppContext);
     const [options, setOptions] = useState([]);
     const [memberIds, setMemberIds] = useState([]);
     const [name, setName] = useState('');
@@ -47,7 +43,7 @@ function GroupCreation({ handleOpenGroupCreation }) {
 
     const getSearchData = async (value) => {
         const result = await userService.search({
-            token: cookies.token,
+            token: accessToken,
             key: value,
         });
         if (result.success) {
@@ -74,7 +70,7 @@ function GroupCreation({ handleOpenGroupCreation }) {
     const handleSubmit = async (e) => {
         if (memberIds.length >= 1 && name.trim().length >= 1) {
             const result = await conversationService.createGroup({
-                token: cookies.token,
+                token: accessToken,
                 name: name.trim(),
                 memberIds,
             });

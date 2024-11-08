@@ -1,4 +1,3 @@
-import React, { useContext, useState } from 'react';
 import {
     Avatar,
     Button,
@@ -7,23 +6,22 @@ import {
     DialogTitle,
     IconButton,
 } from '@mui/material';
+import React, { useState } from 'react';
 
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import conversationService from '../services/ConversationService';
 import { useParams } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
-import { AppContext } from '../contexts/AppContext';
+import { useAppContext } from '../contexts/AppContext';
+import conversationService from '../services/ConversationService';
 
 function MemberCard({ data, admin }) {
-    const { user } = useContext(AppContext);
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
+    const { user, accessToken } = useAppContext();
     const { id } = useParams();
 
     const [openRemoveMemberPopUp, setOpenRemoveMemberPopUp] = useState(false);
 
     const handleRemoveMember = async () => {
         await conversationService.removeMember({
-            token: cookies.token,
+            token: accessToken,
             conversationId: id,
             memberId: data.id,
         });

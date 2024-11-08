@@ -155,62 +155,64 @@ function SideBarHeader() {
                 </Button>
             )}
             {openMenu && (
-                <List
-                    sx={{
-                        position: 'absolute !important',
-                        top: '100%',
-                        minWidth: '200px',
-                        left: 0,
-                        zIndex: 999,
-                        bgcolor: 'var(--third)',
-                        borderRadius: '4px',
-                        boxShadow: '0 0 10px var(--third)',
-                    }}
-                >
-                    <ListItemButton
+                <div onClickCapture={(e) => console.log('siuu')}>
+                    <List
                         sx={{
-                            '&': '2px white',
-                        }}
-                        onClick={(e) => {
-                            setOpenMenu(false);
-                            setOpenProfile(true);
-                        }}
-                    >
-                        <ListItemIcon>
-                            <AccountCircleIcon className="text-white" />
-                        </ListItemIcon>
-                        <ListItemText
-                            primary="Profile"
-                            className="text-white"
-                        />
-                    </ListItemButton>
-                    <ListItemButton
-                        onClick={(e) => {
-                            setOpenGroupCreation(true);
-                            setOpenMenu(false);
+                            position: 'absolute !important',
+                            top: '100%',
+                            minWidth: '200px',
+                            left: 0,
+                            zIndex: 999,
+                            bgcolor: 'var(--third)',
+                            borderRadius: '4px',
+                            boxShadow: '0 0 10px var(--third)',
                         }}
                     >
-                        <ListItemIcon>
-                            <AddCircleIcon className="text-white" />
-                        </ListItemIcon>
-                        <ListItemText
-                            primary="New group"
-                            className="text-white"
-                        />
-                    </ListItemButton>
-                    <ListItemButton
-                        className="border-t-[2px_!important]"
-                        onClick={handleOpenLogoutPopUp}
-                    >
-                        <ListItemIcon>
-                            <LogoutIcon className="text-white" />
-                        </ListItemIcon>
-                        <ListItemText
-                            primary="Log Out"
-                            className="text-white"
-                        />
-                    </ListItemButton>
-                </List>
+                        <ListItemButton
+                            sx={{
+                                '&': '2px white',
+                            }}
+                            onClick={(e) => {
+                                setOpenMenu(false);
+                                setOpenProfile(true);
+                            }}
+                        >
+                            <ListItemIcon>
+                                <AccountCircleIcon className="text-white" />
+                            </ListItemIcon>
+                            <ListItemText
+                                primary="Profile"
+                                className="text-white"
+                            />
+                        </ListItemButton>
+                        <ListItemButton
+                            onClick={(e) => {
+                                setOpenGroupCreation(true);
+                                setOpenMenu(false);
+                            }}
+                        >
+                            <ListItemIcon>
+                                <AddCircleIcon className="text-white" />
+                            </ListItemIcon>
+                            <ListItemText
+                                primary="New group"
+                                className="text-white"
+                            />
+                        </ListItemButton>
+                        <ListItemButton
+                            className="border-t-[2px_!important]"
+                            onClick={handleOpenLogoutPopUp}
+                        >
+                            <ListItemIcon>
+                                <LogoutIcon className="text-white" />
+                            </ListItemIcon>
+                            <ListItemText
+                                primary="Log Out"
+                                className="text-white"
+                            />
+                        </ListItemButton>
+                    </List>
+                </div>
             )}
 
             <FormControl className="w-[80%]">

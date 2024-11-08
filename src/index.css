@@ -33,6 +33,14 @@ code {
   overflow: hidden;
 }
 
+.primary-audio::-webkit-media-controls-panel {
+  background-color: var(--primary);
+}
+
+.third-audio::-webkit-media-controls-panel {
+  background-color: var(--third);
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

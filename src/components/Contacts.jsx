@@ -1,28 +1,23 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import React, { useEffect, useRef, useState } from 'react';
+import { useAppContext } from '../contexts/AppContext';
+import conversationService from '../services/ConversationService';
+import WebSocketService from '../services/WebSocketService';
 import ConversationCard from './ConversationCard';
 import SideBarHeader from './SideBarHeader';
-import conversationService from '../services/ConversationService';
-import { useCookies } from 'react-cookie';
-import CircularProgress from '@mui/material/CircularProgress';
-import { Outlet, useParams } from 'react-router-dom';
-import { AppContext } from '../contexts/AppContext';
-import WebSocketService from '../services/WebSocketService';
-import { ConversationContext } from '../contexts/ConversationContext';
 
 function Contacts() {
-    const { user } = useContext(AppContext);
-    const [cookies, setCookie] = useCookies(['user']);
+    const { user, accessToken } = useAppContext();
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [data, setData] = useState([]);
 
     const wsRef = useRef(null);
-    const innerWidth = window.innerWidth;
 
     const getConversations = async () => {
         const result = await conversationService.getAllConversationsOfUser({
-            token: cookies.token,
+            token: accessToken,
             page: page + 1,
             limit: 10,
         });

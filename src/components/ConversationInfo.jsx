@@ -1,3 +1,11 @@
+import AbcIcon from '@mui/icons-material/Abc';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import ImageIcon from '@mui/icons-material/Image';
+import WestIcon from '@mui/icons-material/West';
 import {
     Avatar,
     AvatarGroup,
@@ -11,27 +19,17 @@ import {
     ListItemIcon,
     ListItemText,
 } from '@mui/material';
-import WestIcon from '@mui/icons-material/West';
-import React, { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../contexts/AppContext';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import AbcIcon from '@mui/icons-material/Abc';
-import ImageIcon from '@mui/icons-material/Image';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import RenameGroup from './RenameGroup';
-import AddMembers from './AddMembers';
-import conversationService from '../services/ConversationService';
-import { useCookies } from 'react-cookie';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAppContext } from '../contexts/AppContext';
+import conversationService from '../services/ConversationService';
+import AddMembers from './AddMembers';
+import ChangeConversationAvatar from './ChangeConversationAvatar';
 import MemberCard from './MemberCard';
-import upLoadFile from '../utils/upLoadFile';
+import RenameGroup from './RenameGroup';
 
 function ConversationInfo({ data, setAvatar, close }) {
-    const { user } = useContext(AppContext);
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
+    const { user, accessToken } = useAppContext();
     const { id } = useParams();
 
     const { isGroup, avatar, total, email, members, name, admin } = data;
@@ -41,12 +39,13 @@ function ConversationInfo({ data, setAvatar, close }) {
     const [openAddMembersPopUp, setOpenAddMembersPopUp] = useState(false);
     const [openDeletePopUp, setDeletePopUp] = useState(false);
     const [openLeaveGroupPopUp, setOpenLeaveGroupPopUp] = useState(false);
+    const [openChangeAvtPopUp, setOpenChangeAvtPopUp] = useState(false);
 
     const navigate = useNavigate();
 
     const handleDeleleteGroup = async () => {
         await conversationService.deleteGroup({
-            token: cookies.token,
+            token: accessToken,
             conversationId: id,
         });
 
@@ -55,24 +54,12 @@ function ConversationInfo({ data, setAvatar, close }) {
 
     const handleLeaveGroup = async () => {
         await conversationService.leaveGroup({
-            token: cookies.token,
+            token: accessToken,
             conversationId: id,
             memberId: user.id,
         });
 
         navigate('/c/');
-    };
-
-    const handleChangeAvatar = () => {
-        upLoadFile({
-            setAvatar,
-            callApi: async (avatar) =>
-                await conversationService.changeAvatar({
-                    token: cookies.token,
-                    id,
-                    avatar,
-                }),
-        });
     };
 
     const handleOpenMemberList = () => {
@@ -92,7 +79,7 @@ function ConversationInfo({ data, setAvatar, close }) {
     };
 
     return (
-        <div className="bg-[var(--third)] absolute top-0 right-0 left-0 h-screen p-[20px_40px] flex flex-col items-center overflow-scroll">
+        <div className="bg-[var(--third)] absolute top-0 right-0 left-0 h-screen p-[20px_40px] flex flex-col items-center overflow-scroll z-[999]">
             <Button
                 color="secondary"
                 sx={{
@@ -193,7 +180,9 @@ function ConversationInfo({ data, setAvatar, close }) {
                                             </ListItemButton>
                                             <ListItemButton
                                                 sx={{ pl: 4 }}
-                                                onClick={handleChangeAvatar}
+                                                onClick={(e) =>
+                                                    setOpenChangeAvtPopUp(true)
+                                                }
                                             >
                                                 <ListItemIcon>
                                                     <ImageIcon />
@@ -334,6 +323,13 @@ function ConversationInfo({ data, setAvatar, close }) {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ChangeConversationAvatar
+                open={openChangeAvtPopUp}
+                setStatus={setOpenChangeAvtPopUp}
+                reloadAvt={setAvatar}
+                haveAvt={avatar !== null}
+                conversationId={id}
+            />
         </div>
     );
 }

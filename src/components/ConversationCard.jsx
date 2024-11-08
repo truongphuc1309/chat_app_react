@@ -1,18 +1,16 @@
 import { Avatar, AvatarGroup } from '@mui/material';
-import React, { useEffect, useState, useContext, useRef } from 'react';
-import { AppContext } from '../contexts/AppContext';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAppContext } from '../contexts/AppContext';
 import messageService from '../services/MessageService';
-import { useCookies } from 'react-cookie';
 
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { formatTime } from '../utils/formatTime';
-import WebSocketService from '../services/WebSocketService';
 import { ConversationContext } from '../contexts/ConversationContext';
+import WebSocketService from '../services/WebSocketService';
+import { formatTime } from '../utils/formatTime';
 
 function ConversationCard({ data }) {
-    const { user } = useContext(AppContext);
-    const [cookies, setCookie] = useCookies(['user']);
+    const { user, accessToken } = useAppContext();
     const navigate = useNavigate();
     const { id } = useParams();
     const [name, setName] = useState('');
@@ -28,19 +26,41 @@ function ConversationCard({ data }) {
 
     const getLastMessage = async () => {
         const result = await messageService.getLastMessageOfConversation({
-            token: cookies.token,
+            token: accessToken,
             conversationId: data.id,
         });
         if (result.success) {
             const message = result.metaData;
             const updatedAt = message.updatedAt;
+
             setTime(formatTime(updatedAt));
-            if (message.active) setLastMessage(message.content);
-            else {
-                if (message.user.id === user.id)
-                    setLastMessage('You unsent a message');
-                else setLastMessage(`${message.user.name} unsent a message`);
-            }
+            if (message.active) {
+                if (message.type === 'text')
+                    setLastMessage(
+                        `${
+                            message.user.id === user.id
+                                ? `You`
+                                : `${message.user.name}`
+                        }: ${message.content}`
+                    );
+                else if (
+                    ['image', 'video', 'file', 'audio'].includes(message.type)
+                )
+                    setLastMessage(
+                        `${
+                            message.user.id === user.id
+                                ? `You`
+                                : `${message.user.name}`
+                        } sent a ${message.type}`
+                    );
+            } else
+                setLastMessage(
+                    `${
+                        message.user.id === user.id
+                            ? `You`
+                            : `${message.user.name}`
+                    } unsent a ${message.type}`
+                );
         } else {
             setLastMessage('');
             setTime('');

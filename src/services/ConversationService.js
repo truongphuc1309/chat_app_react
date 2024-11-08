@@ -93,15 +93,31 @@ class ConversationService {
         );
     };
 
-    static changeAvatar = async ({ token, id, avatar }) => {
+    static updateAvatar = async ({ token, id, avatar }) => {
         return await handleApiResponse(
             async () =>
-                await apiUrl.patch(
+                await apiUrl.post(
                     'conversation/avatar',
                     {
-                        conversationId: id,
                         avatar,
+                        conversationId: id,
                     },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                )
+        );
+    };
+
+    static removeAvatar = async ({ token, id }) => {
+        return await handleApiResponse(
+            async () =>
+                await apiUrl.post(
+                    `conversation/avatar/remove/${id}`,
+                    {},
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
