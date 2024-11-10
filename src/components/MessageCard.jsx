@@ -18,8 +18,8 @@ import messageService from '../services/MessageService';
 import { formatLocalTime } from '../utils/formatTime';
 import { tranferFileSize } from '../utils/tranferFileSize';
 
-function MessageCard({ data, isYour, ws, presentAvt, viewImg }) {
-    const { accessToken } = useAppContext();
+function MessageCard({ data, isYour, presentAvt, viewImg }) {
+    const { accessToken, socket } = useAppContext();
     const messageElementRef = useRef();
     const time = formatLocalTime(data.createdAt);
     const [isHover, setIsHover] = useState(false);
@@ -37,10 +37,11 @@ function MessageCard({ data, isYour, ws, presentAvt, viewImg }) {
         });
 
         if (result.success) {
-            ws.send({
-                destination: `/app/message/delete`,
-                message: result.metaData,
-            });
+            socket.send(
+                '/app/message/delete',
+                {},
+                JSON.stringify(result.metaData)
+            );
         }
         setDeletting(false);
         setOpenDeletePopUp(false);

@@ -1,11 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import ClearIcon from '@mui/icons-material/Clear';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import WestIcon from '@mui/icons-material/West';
 import {
     Button,
     Dialog,
     DialogActions,
-    DialogContent,
-    DialogContentText,
     DialogTitle,
     FormControl,
     InputAdornment,
@@ -15,21 +20,13 @@ import {
     ListItemText,
     TextField,
 } from '@mui/material';
-import { useFormControl } from '@mui/material/FormControl';
-import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import WestIcon from '@mui/icons-material/West';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
 import { useCookies } from 'react-cookie';
-import authService from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
-import GroupCreation from './GroupCreation';
-import userService from '../services/UserService';
-import SearchResultCard from './SearchResultCard';
 import { AppContext } from '../contexts/AppContext';
+import authService from '../services/AuthService';
+import userService from '../services/UserService';
+import GroupCreation from './GroupCreation';
+import SearchResultCard from './SearchResultCard';
 
 function SideBarHeader() {
     const textStyle = {

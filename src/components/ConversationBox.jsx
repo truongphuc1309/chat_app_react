@@ -1,8 +1,6 @@
 import DownloadIcon from '@mui/icons-material/Download';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import {
     Avatar,
-    AvatarGroup,
     Button,
     CircularProgress,
     Dialog,
@@ -18,6 +16,7 @@ import conversationService from '../services/ConversationService';
 import messageService from '../services/MessageService';
 import WebSocketService from '../services/WebSocketService';
 import { formatLocalTime } from '../utils/formatTime';
+import ConversationBoxHeader from './ConversationBoxHeader';
 import ConversationInfo from './ConversationInfo';
 import LoadingFile from './LoadingFile';
 import MessageCard from './MessageCard';
@@ -25,8 +24,9 @@ import SendMessage from './SendMessage';
 
 function ConversationBox() {
     const { id } = useParams();
-    const { user, accessToken } = useAppContext();
+    const { user, accessToken, socket } = useAppContext();
 
+    const [subscription, setSubscription] = useState(null);
     const [data, setData] = useState(null);
     const [name, setName] = useState('');
     const [isGroup, setIsGroup] = useState(false);
@@ -42,10 +42,7 @@ function ConversationBox() {
     const [loading, setLoading] = useState(true);
     const { conversation } = useContext(ConversationContext);
     const { openConversationBox, setOpenConversationBox } = conversation;
-    const innerWidth = window.innerWidth;
     const [viewImg, setViewImg] = useState(null);
-    const wsRef = useRef(null);
-
     const [loadingFiles, setLoadingFiles] = useState([]);
 
     useEffect(() => {
@@ -53,21 +50,18 @@ function ConversationBox() {
         pageRef.current = 1;
         getMessages();
 
-        if (wsRef.current && id !== conversationIdRef.current) {
-            wsRef.current.disconnect();
-            wsRef.current.unsubscribe();
+        if (id !== conversationIdRef.current && subscription) {
+            subscription.unsubscribe();
         }
-        wsRef.current = new WebSocketService({
-            broker: `/topic/conversation/${id}`,
-            onReceived: handleOnReceiveMessage,
-        });
-        wsRef.current.connect(accessToken);
+        setSubscription(
+            socket.subscribe(
+                `/topic/conversation/${id}`,
+                handleOnReceiveMessage
+            )
+        );
 
         return () => {
-            if (wsRef.current) {
-                wsRef.current.disconnect();
-                wsRef.current.unsubscribe();
-            }
+            if (subscription) subscription.unsubscribe();
         };
     }, [id]);
 
@@ -78,9 +72,6 @@ function ConversationBox() {
         if (action === 'SEND') {
             setMessages((prev) => [data, ...prev]);
         } else if (action === 'DELETE') {
-            const temp = messages.map((e) => {
-                return e;
-            });
             setMessages((prev) =>
                 prev.map((e) => {
                     if (e.id === data.id) return data;
@@ -194,7 +185,6 @@ function ConversationBox() {
                         </p>
                     )}
                     <MessageCard
-                        ws={wsRef.current}
                         data={e}
                         key={index}
                         isYour={e.user.id === user.id}
@@ -217,89 +207,14 @@ function ConversationBox() {
                 openConversationBox ? 'flex' : 'hidden'
             } flex-col lg:b bg-[#ccc7f387]`}
         >
-            <div
-                className="h-[86px] bg-[var(--primary)] flex items-center p-[0_40px] cursor-pointer"
-                onClick={() => setOpenGroupInfo(true)}
-            >
-                {innerWidth < 768 && (
-                    <Button
-                        color="secondary"
-                        sx={{
-                            color: '#fff',
-                            padding: '20px',
-                            marginLeft: '-20px',
-                            marginRight: '20px',
-                        }}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenConversationBox(false);
-                        }}
-                    >
-                        <KeyboardArrowLeftIcon
-                            sx={{
-                                height: '3rem',
-                                width: '3rem',
-                            }}
-                        />
-                    </Button>
-                )}
-                <div className="w-min-[120px]">
-                    {isGroup && !avatar && (
-                        <AvatarGroup
-                            total={total}
-                            max={3}
-                            variant="circular"
-                            className="flex items-center mr-2"
-                            sx={{
-                                '& .MuiAvatar-root': {
-                                    height: '34px',
-                                    width: '34px',
-                                },
-                            }}
-                        >
-                            {data.members[0] && (
-                                <Avatar
-                                    sx={{ bgcolor: 'var(--primary)' }}
-                                    src={data.members[0].avatar || ''}
-                                ></Avatar>
-                            )}
-                            {data.members[1] && (
-                                <Avatar
-                                    sx={{ bgcolor: 'var(--primary)' }}
-                                    src={data.members[1].avatar || ''}
-                                ></Avatar>
-                            )}
-                        </AvatarGroup>
-                    )}
-                    {(!isGroup || avatar) && (
-                        <Avatar
-                            className="mr-2"
-                            sx={{ width: '60px', height: '60px' }}
-                            src={avatar || ''}
-                        ></Avatar>
-                    )}
-                </div>
-                <h1 className="text-white text-2xl ml-4">{name}</h1>
-            </div>
-            <div
-                className="flex-1 flex  flex-col-reverse p-[0_20px] overflow-y-scroll overflow-x-hidden no-scrollbar"
-                onScroll={handleScroll}
-            >
-                {loadingFiles.map((e) => (
-                    <LoadingFile data={e} />
-                ))}
-                {handleRenderMessage(messages)}
-                {loading && (
-                    <CircularProgress
-                        color="secondary"
-                        className="m-[20px_auto]"
-                    />
-                )}
-            </div>
-            <SendMessage
-                setMessages={setMessages}
-                ws={wsRef.current}
-                setLoadingFiles={setLoadingFiles}
+            <ConversationBoxHeader
+                data={data}
+                avatar={avatar}
+                name={name}
+                total={total}
+                isGroup={isGroup}
+                setOpenGroupInfo={setOpenGroupInfo}
+                setOpenConversationBox={setOpenConversationBox}
             />
 
             {openGroupInfo && (
@@ -317,6 +232,26 @@ function ConversationBox() {
                     close={closeGroupInfo}
                 />
             )}
+
+            <div
+                className="flex-1 flex  flex-col-reverse p-[0_20px] overflow-y-scroll overflow-x-hidden no-scrollbar"
+                onScroll={handleScroll}
+            >
+                {loadingFiles.map((e) => (
+                    <LoadingFile data={e} />
+                ))}
+                {handleRenderMessage(messages)}
+                {loading && (
+                    <CircularProgress
+                        color="secondary"
+                        className="m-[20px_auto]"
+                    />
+                )}
+            </div>
+            <SendMessage
+                setMessages={setMessages}
+                setLoadingFiles={setLoadingFiles}
+            />
 
             <Dialog open={viewImg}>
                 <DialogTitle className="flex items-center">

@@ -7,13 +7,11 @@ import ConversationCard from './ConversationCard';
 import SideBarHeader from './SideBarHeader';
 
 function Contacts() {
-    const { user, accessToken } = useAppContext();
+    const { user, accessToken, socket } = useAppContext();
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [data, setData] = useState([]);
-
-    const wsRef = useRef(null);
 
     const getConversations = async () => {
         const result = await conversationService.getAllConversationsOfUser({
@@ -34,30 +32,14 @@ function Contacts() {
 
     useEffect(() => {
         getConversations();
-        if (wsRef.current) {
-            wsRef.current.disconnect();
-            wsRef.current.unsubscribe();
-        }
+        socket.subscribe(`/topic/conversation/list/${user.id}`, (mess) => {
+            const messageData = JSON.parse(mess.body);
+            setData((prev) => {
+                const temp = prev.filter((e) => e.id !== messageData.id);
 
-        wsRef.current = new WebSocketService({
-            broker: `/topic/conversation/list/${user.id}`,
-            onReceived: (mess) => {
-                const messageData = JSON.parse(mess.body);
-                setData((prev) => {
-                    const temp = prev.filter((e) => e.id !== messageData.id);
-
-                    return [messageData, ...temp];
-                });
-            },
+                return [messageData, ...temp];
+            });
         });
-        wsRef.current.connect();
-
-        return () => {
-            if (wsRef.current) {
-                wsRef.current.disconnect();
-                wsRef.current.unsubscribe();
-            }
-        };
     }, []);
 
     const removeDuplicate = (list) => {
@@ -98,7 +80,6 @@ function Contacts() {
                     )}
                 </div>
             </div>
-            {/* <Outlet /> */}
         </div>
     );
 }

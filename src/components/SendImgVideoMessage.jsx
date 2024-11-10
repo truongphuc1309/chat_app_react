@@ -1,3 +1,5 @@
+import AudiotrackIcon from '@mui/icons-material/Audiotrack';
+import ClearIcon from '@mui/icons-material/Clear';
 import {
     Alert,
     Button,
@@ -8,17 +10,14 @@ import {
     IconButton,
     Snackbar,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import ClearIcon from '@mui/icons-material/Clear';
-import messageService from '../services/MessageService';
-import { useCookies } from 'react-cookie';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import AudiotrackIcon from '@mui/icons-material/Audiotrack';
-import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
+import { useAppContext } from '../contexts/AppContext';
+import messageService from '../services/MessageService';
 import resetFileInput from '../utils/resetFileInput';
 
-function SendImgVideoMessage({ ws, setLoadingFiles }) {
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
+function SendImgVideoMessage({ setLoadingFiles }) {
+    const { accessToken, socket } = useAppContext();
     const { id } = useParams();
 
     const [previewImgVideoPopUp, setPreviewImgVideoPopUp] = useState(false);
@@ -52,17 +51,14 @@ function SendImgVideoMessage({ ws, setLoadingFiles }) {
         setLoadingFiles((pre) => [loadingFile, ...pre]);
 
         const result = await messageService.sendMessage({
-            token: cookies.token,
+            token: accessToken,
             conversationId: id,
             file: file,
             type: file.type.split('/')[0],
         });
 
         if (result.success)
-            ws.send({
-                destination: `/app/message`,
-                message: result.metaData,
-            });
+            socket.send('/app/message', {}, JSON.stringify(result.metaData));
         else setError(result.message);
 
         setLoadingFiles((pre) =>

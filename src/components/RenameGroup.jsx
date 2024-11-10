@@ -6,20 +6,20 @@ import {
     DialogTitle,
     TextField,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import conversationService from '../services/ConversationService';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
+import conversationService from '../services/ConversationService';
+import { useAppContext } from '../contexts/AppContext';
 
 function RenameGroup({ open, close }) {
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
+    const { accessToken } = useAppContext();
     const { id } = useParams();
     const [input, setInput] = useState('');
 
     const handleSubmit = async () => {
         if (input.trim().length > 0) {
             const result = await conversationService.updateName({
-                token: cookies.token,
+                token: accessToken,
                 id,
                 name: input,
             });

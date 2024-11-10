@@ -15,8 +15,8 @@ import { useParams } from 'react-router-dom';
 import WavesurferPlayer from '@wavesurfer/react';
 import { useAppContext } from '../contexts/AppContext';
 
-const AudioMessageRecorder = ({ setOpenRecorder, ws, setLoadingFiles }) => {
-    const { accessToken } = useAppContext();
+const AudioMessageRecorder = ({ setOpenRecorder, setLoadingFiles }) => {
+    const { accessToken, socket } = useAppContext();
     const { id } = useParams();
 
     const [record, setRecord] = useState(false);
@@ -90,10 +90,11 @@ const AudioMessageRecorder = ({ setOpenRecorder, ws, setLoadingFiles }) => {
             });
 
             if (result.success) {
-                ws.send({
-                    destination: `/app/message`,
-                    message: result.metaData,
-                });
+                socket.send(
+                    '/app/message',
+                    {},
+                    JSON.stringify(result.metaData)
+                );
             }
 
             setLoadingFiles((pre) => pre.filter((e) => e?.url !== url));

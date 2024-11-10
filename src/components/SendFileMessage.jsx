@@ -1,3 +1,5 @@
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import {
     Alert,
     Button,
@@ -8,19 +10,16 @@ import {
     IconButton,
     Snackbar,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import ClearIcon from '@mui/icons-material/Clear';
-import messageService from '../services/MessageService';
-import { useCookies } from 'react-cookie';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import messageService from '../services/MessageService';
 
-import { tranferFileSize } from '../utils/tranferFileSize';
+import { useAppContext } from '../contexts/AppContext';
 import resetFileInput from '../utils/resetFileInput';
+import { tranferFileSize } from '../utils/tranferFileSize';
 
-function SendFileMessage({ ws, setLoadingFiles }) {
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
+function SendFileMessage({ setLoadingFiles }) {
+    const { accessToken, socket } = useAppContext();
     const { id } = useParams();
 
     const [previewFilePopUp, setPreviewFilePopUp] = useState(false);
@@ -47,16 +46,13 @@ function SendFileMessage({ ws, setLoadingFiles }) {
         setLoadingFiles((pre) => [loadingFile, ...pre]);
 
         const result = await messageService.sendMessage({
-            token: cookies.token,
+            token: accessToken,
             conversationId: id,
             file: file,
             type: 'file',
         });
         if (result.success) {
-            ws.send({
-                destination: `/app/message`,
-                message: result.metaData,
-            });
+            socket.send('/app/message', {}, JSON.stringify(result.metaData));
         } else setError(result.message);
 
         setLoadingFiles((pre) =>

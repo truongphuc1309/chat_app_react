@@ -1,17 +1,15 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
-import { useCookies } from 'react-cookie';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { Avatar, Badge, Button, IconButton, TextField } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 import EditIcon from '@mui/icons-material/Edit';
+import { Avatar, Badge, Button, IconButton, TextField } from '@mui/material';
+import { useAppContext } from '../contexts/AppContext';
 import userService from '../services/UserService';
-import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../contexts/AppContext';
 import ChangeUserAvatar from './ChangeUserAvatar';
 
 function Profile() {
-    const { user, profile } = useContext(AppContext);
+    const { user, profile, accessToken } = useAppContext();
     const { setOpenProfile } = profile;
 
     const [email, setEmail] = useState('');
@@ -21,7 +19,6 @@ function Profile() {
     const [edit, setEdit] = useState(false);
     const [update, setUpdate] = useState(false);
 
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
     const oldName = useRef();
     const [openChangeAvtPopUp, setOpenChangeAvtPopUp] = useState(false);
 
@@ -35,7 +32,7 @@ function Profile() {
 
     const handleUpdateName = async (e) => {
         const result = await userService.updateName({
-            token: cookies.token,
+            token: accessToken,
             name,
         });
 

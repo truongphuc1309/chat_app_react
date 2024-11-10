@@ -1,21 +1,20 @@
 import {
+    Autocomplete,
+    Avatar,
+    Box,
     Button,
     Dialog,
     DialogActions,
-    DialogTitle,
     DialogContent,
-    Autocomplete,
+    DialogTitle,
     TextField,
-    Box,
-    Avatar,
 } from '@mui/material';
-import React, { useState, useEffect } from 'react';
-import { useCookies } from 'react-cookie';
+import React, { useEffect, useState } from 'react';
 
-import userService from '../services/UserService';
+import { useParams } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
 import conversationService from '../services/ConversationService';
-import { useParams } from 'react-router-dom';
+import userService from '../services/UserService';
 
 function AddMembers({ members, open, close }) {
     const { id } = useParams();

@@ -9,37 +9,19 @@ import {
     DialogTitle,
     TextField,
 } from '@mui/material';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import conversationService from '../services/ConversationService';
 import userService from '../services/UserService';
-import WebSocketService from '../services/WebSocketService';
 
 function GroupCreation({ handleOpenGroupCreation }) {
-    const { user, accessToken } = useContext(AppContext);
+    const { user, accessToken, socket } = useContext(AppContext);
     const [options, setOptions] = useState([]);
     const [memberIds, setMemberIds] = useState([]);
     const [name, setName] = useState('');
     const navigate = useNavigate();
-    const wsRef = useRef();
-
-    useEffect(() => {
-        if (wsRef.current) {
-            wsRef.current.disconnect();
-            wsRef.current.unsubscribe();
-        }
-        wsRef.current = new WebSocketService({});
-        wsRef.current.connect();
-
-        return () => {
-            if (wsRef.current) {
-                wsRef.current.disconnect();
-                wsRef.current.unsubscribe();
-            }
-        };
-    }, []);
 
     const getSearchData = async (value) => {
         const result = await userService.search({
@@ -76,10 +58,11 @@ function GroupCreation({ handleOpenGroupCreation }) {
             });
 
             if (result.success) {
-                wsRef.current.send({
-                    destination: `/app/conversation`,
-                    message: result.metaData,
-                });
+                socket.send(
+                    '/app/conversation',
+                    {},
+                    JSON.stringify(result.metaData)
+                );
                 handleOpenGroupCreation(false);
                 navigate(`/c/${result.metaData.id}`);
             }

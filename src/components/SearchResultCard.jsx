@@ -11,35 +11,18 @@ import conversationService from '../services/ConversationService';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { AppContext } from '../contexts/AppContext';
+import { AppContext, useAppContext } from '../contexts/AppContext';
 import WebSocketService from '../services/WebSocketService';
 
 function SearchResultCard({ data, closeSearch }) {
-    const { user } = useContext(AppContext);
-    const [cookies, setCookie] = useCookies(['user']);
+    const { accessToken, socket } = useAppContext();
     const navigate = useNavigate();
     const [openCreatePopUp, setOpenCreatePopUp] = useState(false);
     const wsRef = useRef();
 
-    useEffect(() => {
-        if (wsRef.current) {
-            wsRef.current.disconnect();
-            wsRef.current.unsubscribe();
-        }
-        wsRef.current = new WebSocketService({});
-        wsRef.current.connect();
-
-        return () => {
-            if (wsRef.current) {
-                wsRef.current.disconnect();
-                wsRef.current.unsubscribe();
-            }
-        };
-    }, []);
-
     const handleClick = async () => {
         const result = await conversationService.getSingleConversationByUser({
-            token: cookies.token,
+            token: accessToken,
             id: data.id,
         });
 
@@ -49,14 +32,15 @@ function SearchResultCard({ data, closeSearch }) {
 
     const handleCreate = async () => {
         const result = await conversationService.createSingleConversation({
-            token: cookies.token,
+            token: accessToken,
             memberIds: [data.id],
         });
         if (result.success) {
-            wsRef.current.send({
-                destination: `/app/conversation`,
-                message: result.metaData,
-            });
+            this.stomp.send(
+                `/app/conversation`,
+                {},
+                JSON.stringify(result.metaData)
+            );
 
             closeSearch();
             navigate(`/c/${result.metaData.id}`);

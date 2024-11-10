@@ -1,4 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
+import ArticleIcon from '@mui/icons-material/Article';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import ImageIcon from '@mui/icons-material/Image';
+import MicIcon from '@mui/icons-material/Mic';
+import SendIcon from '@mui/icons-material/Send';
+import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import {
     FormControl,
     IconButton,
@@ -7,22 +14,15 @@ import {
     ListItemButton,
     TextField,
 } from '@mui/material';
-import data from '@emoji-mart/data';
-import Picker from '@emoji-mart/react';
-import ImageIcon from '@mui/icons-material/Image';
-import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
-import SendIcon from '@mui/icons-material/Send';
-import messageService from '../services/MessageService';
-import { useCookies } from 'react-cookie';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import ArticleIcon from '@mui/icons-material/Article';
-import SendImgVideoMessage from './SendImgVideoMessage';
-import SendFileMessage from './SendFileMessage';
-import MicIcon from '@mui/icons-material/Mic';
+import { useAppContext } from '../contexts/AppContext';
+import messageService from '../services/MessageService';
 import AudioMessageRecorder from './AudioMessageRecorder';
+import SendFileMessage from './SendFileMessage';
+import SendImgVideoMessage from './SendImgVideoMessage';
 
-function SendMessage({ setMessages, ws, setLoadingFiles }) {
+function SendMessage({ setLoadingFiles }) {
     const textFieldStyle = {
         '&.MuiTextField-root': {
             backGroundColor: '#000',
@@ -45,7 +45,7 @@ function SendMessage({ setMessages, ws, setLoadingFiles }) {
         },
     };
 
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
+    const { accessToken, socket } = useAppContext();
     const { id } = useParams();
     const [openUploadOptions, setOpenUploadOptions] = useState(false);
     const [iconList, setIconList] = useState(false);
@@ -55,16 +55,17 @@ function SendMessage({ setMessages, ws, setLoadingFiles }) {
     const handleSendMessage = async () => {
         if (input.length > 0) {
             const result = await messageService.sendMessage({
-                token: cookies.token,
+                token: accessToken,
                 conversationId: id,
                 content: input,
             });
 
             if (result.success) {
-                ws.send({
-                    destination: `/app/message`,
-                    message: result.metaData,
-                });
+                socket.send(
+                    '/app/message',
+                    {},
+                    JSON.stringify(result.metaData)
+                );
             }
         }
     };
@@ -77,7 +78,6 @@ function SendMessage({ setMessages, ws, setLoadingFiles }) {
                     onClick={() => {
                         setOpenRecorder(true);
                     }}
-                    // size="4rem"
                 >
                     <MicIcon className="text-[var(--primary)] !text-[2rem]" />
                 </IconButton>
@@ -184,7 +184,6 @@ function SendMessage({ setMessages, ws, setLoadingFiles }) {
                         handleSendMessage();
                         setInput('');
                     }}
-                    // size="4rem"
                 >
                     <SendIcon className="text-[var(--primary)] !text-[1.8rem]" />
                 </IconButton>
@@ -192,12 +191,11 @@ function SendMessage({ setMessages, ws, setLoadingFiles }) {
             {openRecorder && (
                 <AudioMessageRecorder
                     setOpenRecorder={setOpenRecorder}
-                    ws={ws}
                     setLoadingFiles={setLoadingFiles}
                 />
             )}
-            <SendImgVideoMessage ws={ws} setLoadingFiles={setLoadingFiles} />
-            <SendFileMessage ws={ws} setLoadingFiles={setLoadingFiles} />
+            <SendImgVideoMessage setLoadingFiles={setLoadingFiles} />
+            <SendFileMessage setLoadingFiles={setLoadingFiles} />
         </div>
     );
 }

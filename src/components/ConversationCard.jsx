@@ -10,7 +10,7 @@ import WebSocketService from '../services/WebSocketService';
 import { formatTime } from '../utils/formatTime';
 
 function ConversationCard({ data }) {
-    const { user, accessToken } = useAppContext();
+    const { user, accessToken, socket } = useAppContext();
     const navigate = useNavigate();
     const { id } = useParams();
     const [name, setName] = useState('');
@@ -22,7 +22,6 @@ function ConversationCard({ data }) {
     const [time, setTime] = useState('');
     const { conversation } = useContext(ConversationContext);
     const { setOpenConversationBox } = conversation;
-    const wsRef = useRef();
 
     const getLastMessage = async () => {
         const result = await messageService.getLastMessageOfConversation({
@@ -84,22 +83,9 @@ function ConversationCard({ data }) {
         handleAvatarAndName(data, user);
         getLastMessage();
 
-        if (wsRef.current) {
-            wsRef.current.disconnect();
-            wsRef.current.unsubscribe();
-        }
-        wsRef.current = new WebSocketService({
-            broker: `/topic/message/last/${data.id}`,
-            onReceived: (mess) => getLastMessage(),
-        });
-        wsRef.current.connect();
-
-        return () => {
-            if (wsRef.current) {
-                wsRef.current.disconnect();
-                wsRef.current.unsubscribe();
-            }
-        };
+        socket.subscribe(`/topic/message/last/${data.id}`, (mess) =>
+            getLastMessage()
+        );
     }, [data]);
 
     useEffect(() => {

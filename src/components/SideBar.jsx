@@ -1,11 +1,8 @@
-import { Outlet } from 'react-router-dom';
-import ConversationProvider, {
-    ConversationContext,
-} from '../contexts/ConversationContext';
+import { useContext, useEffect } from 'react';
+import { AppContext } from '../contexts/AppContext';
+import { ConversationContext } from '../contexts/ConversationContext';
 import Contacts from './Contacts';
 import Profile from './Profile';
-import { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../contexts/AppContext';
 
 function SideBar() {
     const innerWidth = window.innerWidth;
@@ -23,11 +20,8 @@ function SideBar() {
                 !openConversationBox ? 'block' : 'hidden'
             } w-[100%] h-screen p-2 flex flex-col`}
         >
-            {/* <ConversationProvider> */}
-            {/* <Outlet /> */}
             <Contacts />
             {openProfile && <Profile />}
-            {/* </ConversationProvider> */}
         </div>
     );
 }
