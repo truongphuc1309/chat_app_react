@@ -1,10 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { createContext } from 'react';
-import userService from '../services/UserService';
+import { Stomp } from '@stomp/stompjs';
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
+import UserService from '../services/UserService';
 
 const wsUrl = 'http://localhost:8080/ws';
 export const AppContext = createContext({});
@@ -12,40 +17,60 @@ export const AppContext = createContext({});
 function AppProvider({ children }) {
     const navigate = useNavigate();
 
-    const [cookies] = useCookies(['user']);
+    const [cookies, setCookie, removeCookie] = useCookies(['user']);
     const accessToken = cookies.token;
 
-    const [socket, setSocket] = useState(null);
+    const socketRef = useRef();
 
     const [openProfile, setOpenProfile] = useState(false);
     const [user, setUser] = useState({});
+    const [openConversationBox, setOpenConversationBox] = useState(true);
     const [loading, setLoading] = useState(true);
 
     const getProfile = async () => {
-        const result = await userService.getProfile(accessToken);
+        if (!accessToken) {
+            navigate('/login');
+            return;
+        }
+
+        const result = await UserService.getProfile(accessToken);
         if (result.success) {
             setUser(result.metaData);
-            setLoading(false);
-        } else navigate('/login');
+            return;
+        }
+        removeCookie('token', { path: '/' });
+        removeCookie('refresh_token', { path: '/' });
+        navigate('/login');
+    };
+
+    const run = async () => {
+        await getProfile();
+        const ws = new SockJS(wsUrl);
+        const stomp = Stomp.over(ws);
+        if (cookies.token) {
+            stomp.connect(
+                {
+                    Authorization: `Bearer ${cookies.token}`,
+                },
+                () => {
+                    console.log('Success connect to ws');
+
+                    socketRef.current = stomp;
+                    setLoading(false);
+                },
+                () => {
+                    console.log('Error connect to ws');
+                }
+            );
+        }
     };
 
     useEffect(() => {
-        const ws = new SockJS(wsUrl);
-        const stomp = Stomp.over(ws);
-        stomp.connect(
-            {},
-            () => {
-                console.log('Success connect to ws');
-            },
-            () => {
-                console.log('Error connect to ws');
-            }
-        );
-        setSocket(stomp);
-        getProfile();
+        run();
 
         return () => {
-            stomp.disconnect();
+            socketRef.current.disconnect();
+            console.log('Log out');
         };
     }, []);
 
@@ -53,12 +78,16 @@ function AppProvider({ children }) {
         user,
         accessToken,
         profile: { openProfile, setOpenProfile },
-        socket,
+        socket: socketRef.current,
+        conversation: {
+            openConversationBox,
+            setOpenConversationBox,
+        },
     };
 
     return (
         <AppContext.Provider value={value}>
-            {!loading && children}
+            {!loading && socketRef.current && children}
         </AppContext.Provider>
     );
 }

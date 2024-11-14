@@ -73,6 +73,21 @@ class UserService {
                 )
         );
     };
+
+    static updateStatus = async ({ token, online }) => {
+        return await handleApiResponse(
+            async () =>
+                await apiUrl.post(
+                    'user/status',
+                    { online },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                )
+        );
+    };
 }
 
 export default UserService;

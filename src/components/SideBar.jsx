@@ -1,12 +1,12 @@
 import { useContext, useEffect } from 'react';
-import { AppContext } from '../contexts/AppContext';
+import { AppContext, useAppContext } from '../contexts/AppContext';
 import { ConversationContext } from '../contexts/ConversationContext';
 import Contacts from './Contacts';
 import Profile from './Profile';
 
 function SideBar() {
     const innerWidth = window.innerWidth;
-    const { conversation } = useContext(ConversationContext);
+    const { conversation } = useAppContext();
     const { openConversationBox, setOpenConversationBox } = conversation;
     const { profile } = useContext(AppContext);
     const { openProfile, setOpenProfile } = profile;

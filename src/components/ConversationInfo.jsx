@@ -7,8 +7,6 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import ImageIcon from '@mui/icons-material/Image';
 import WestIcon from '@mui/icons-material/West';
 import {
-    Avatar,
-    AvatarGroup,
     Button,
     Collapse,
     Dialog,
@@ -19,7 +17,7 @@ import {
     ListItemIcon,
     ListItemText,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
 import conversationService from '../services/ConversationService';
@@ -27,12 +25,18 @@ import AddMembers from './AddMembers';
 import ChangeConversationAvatar from './ChangeConversationAvatar';
 import MemberCard from './MemberCard';
 import RenameGroup from './RenameGroup';
+import ConversationAvatar from './common/ConversationAvatar';
+import { useConversationContext } from '../contexts/ConversationContext';
 
-function ConversationInfo({ data, setAvatar, close }) {
+function ConversationInfo({ close }) {
+    const { data } = useConversationContext();
+
     const { user, accessToken } = useAppContext();
     const { id } = useParams();
 
-    const { isGroup, avatar, total, email, members, name, admin } = data;
+    const [partner, setPartner] = useState(null);
+    const [admin, setAdmin] = useState(false);
+    const { group, avatar, email, members, name } = data;
     const [openMemberList, setOpenMemberList] = useState(false);
     const [openEditList, setOpenEditList] = useState(false);
     const [openChangeNamePopUp, setOpenChangeNamePopUp] = useState(false);
@@ -42,6 +46,11 @@ function ConversationInfo({ data, setAvatar, close }) {
     const [openChangeAvtPopUp, setOpenChangeAvtPopUp] = useState(false);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setAdmin(data?.createdBy.id === user.id);
+        setPartner(() => data?.members.find((e) => e.id !== user.id));
+    }, []);
 
     const handleDeleleteGroup = async () => {
         await conversationService.deleteGroup({
@@ -92,59 +101,24 @@ function ConversationInfo({ data, setAvatar, close }) {
                 <WestIcon />
             </Button>
             <h1 className="text-[2rem] text-[var(--primary)] font-semibold text-center">
-                {isGroup ? 'Group Info' : 'User Info'}
+                {group ? 'Group Info' : 'User Info'}
             </h1>
-            <div className="flex justify-center mt-10 h-[200px]">
-                {isGroup && !avatar && (
-                    <AvatarGroup
-                        total={total}
-                        max={3}
-                        variant="circular"
-                        className="flex items-center mr-2"
-                        sx={{
-                            '& .MuiAvatar-root': {
-                                height: '100px',
-                                width: '100px',
-                            },
-                        }}
-                    >
-                        {data.members[0] && (
-                            <Avatar
-                                sx={{ bgcolor: 'var(--primary)' }}
-                                src={members[0].avatar || ''}
-                            ></Avatar>
-                        )}
-                        {data.members[1] && (
-                            <Avatar
-                                sx={{ bgcolor: 'var(--primary)' }}
-                                src={members[1].avatar || ''}
-                            ></Avatar>
-                        )}
-                    </AvatarGroup>
-                )}
-                {(!isGroup || avatar) && (
-                    <Avatar
-                        className="mr-2"
-                        sx={{ width: '200px', height: '200px' }}
-                        src={avatar || ''}
-                    ></Avatar>
-                )}
-            </div>
+            <ConversationAvatar data={data} width={'200px'} size={'large'} />
             <h1 className="text-[3rem] text-[var(--primary)] text-center">
                 {name}
             </h1>
             <div className="w-[400px] mt-8">
-                {!isGroup && (
+                {!group && (
                     <div>
                         <h1 className="text-[var(--primary)] text-[1.4rem]">
                             Email
                         </h1>
                         <p className="text-[#818080] text-[1.2rem] tracking-widest">
-                            {email}
+                            {partner?.email}
                         </p>
                     </div>
                 )}
-                {isGroup && (
+                {group && (
                     <div>
                         <div>
                             <ListItemButton onClick={handleOpenEditList}>
@@ -326,7 +300,7 @@ function ConversationInfo({ data, setAvatar, close }) {
             <ChangeConversationAvatar
                 open={openChangeAvtPopUp}
                 setStatus={setOpenChangeAvtPopUp}
-                reloadAvt={setAvatar}
+                // reloadAvt={setAvatar}
                 haveAvt={avatar !== null}
                 conversationId={id}
             />

@@ -14,10 +14,12 @@ function Home() {
     return (
         <AppProvider>
             <div className="bg-[url('https://t3.ftcdn.net/jpg/01/99/79/88/360_F_199798806_PAFfWGapie6Mk8igqKHbhIIa9LwQcvQr.jpg')] bg-repeat bg-center h-screen flex">
-                <ConversationProvider>
-                    <SideBar />
-                    {id && <ConversationBox />}
-                </ConversationProvider>
+                <SideBar />
+                {id && (
+                    <ConversationProvider>
+                        <ConversationBox />
+                    </ConversationProvider>
+                )}
             </div>
         </AppProvider>
     );

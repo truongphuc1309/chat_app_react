@@ -1,18 +1,53 @@
-import { Avatar, AvatarGroup, Button } from '@mui/material';
-import React from 'react';
+import { Button } from '@mui/material';
+import React, { memo, useEffect, useRef } from 'react';
 
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import { useConversationContext } from '../contexts/ConversationContext';
+import ConversationAvatar from './common/ConversationAvatar';
+import { useAppContext } from '../contexts/AppContext';
+import { useState } from 'react';
+import { formatLocalTime } from '../utils/formatTime';
 
-function ConversationBoxHeader({
-    data,
-    avatar,
-    name,
-    total,
-    isGroup,
-    setOpenGroupInfo,
-    setOpenConversationBox,
-}) {
+function ConversationBoxHeader({ setOpenGroupInfo, setOpenConversationBox }) {
     const innerWidth = window.innerWidth;
+
+    const { user, socket } = useAppContext();
+    const { data } = useConversationContext();
+    const [name, setName] = useState();
+    const [online, setOnline] = useState();
+    const [lastSeen, setLastSeen] = useState();
+    const partnerRef = useRef();
+    const [subscription, setSubscription] = useState(null);
+
+    useEffect(() => {
+        if (!data?.group) {
+            partnerRef.current = data?.members.find((e) => {
+                return e.id !== user.id;
+            });
+            if (partnerRef.current) {
+                setSubscription(
+                    socket.subscribe(
+                        `/topic/user/${partnerRef.current.id}`,
+                        (mess) => {
+                            const message = JSON.parse(mess.body);
+                            console.log('::Parter::', message);
+                            setName(message.name);
+                            setOnline(message.online);
+                            setLastSeen(message.updatedAt);
+                        }
+                    )
+                );
+                setName(partnerRef.current.name);
+                setOnline(partnerRef.current.online);
+                setLastSeen(partnerRef.current.updatedAt);
+            }
+        }
+
+        return () => {
+            if (subscription) subscription.unsubscribe();
+        };
+    }, [data]);
+
     return (
         <div
             className="h-[86px] bg-[var(--primary)] flex items-center p-[0_40px] cursor-pointer"
@@ -40,45 +75,31 @@ function ConversationBoxHeader({
                     />
                 </Button>
             )}
-            <div className="w-min-[120px]">
-                {isGroup && !avatar && (
-                    <AvatarGroup
-                        total={total}
-                        max={3}
-                        variant="circular"
-                        className="flex items-center mr-2"
-                        sx={{
-                            '& .MuiAvatar-root': {
-                                height: '34px',
-                                width: '34px',
-                            },
-                        }}
-                    >
-                        {data.members[0] && (
-                            <Avatar
-                                sx={{ bgcolor: 'var(--primary)' }}
-                                src={data.members[0].avatar || ''}
-                            ></Avatar>
-                        )}
-                        {data.members[1] && (
-                            <Avatar
-                                sx={{ bgcolor: 'var(--primary)' }}
-                                src={data.members[1].avatar || ''}
-                            ></Avatar>
-                        )}
-                    </AvatarGroup>
-                )}
-                {(!isGroup || avatar) && (
-                    <Avatar
-                        className="mr-2"
-                        sx={{ width: '60px', height: '60px' }}
-                        src={avatar || ''}
-                    ></Avatar>
-                )}
+            <div>
+                <ConversationAvatar data={data} />
             </div>
-            <h1 className="text-white text-2xl ml-4">{name}</h1>
+            {data?.group && (
+                <div className="ml-4">
+                    <h1 className="text-white text-2xl">{data?.name}</h1>
+                    <p className="text-[#d6d6d6] text-sm">
+                        {data?.members.length}
+                        {data?.members.length > 1 ? ' members' : ' member'}
+                    </p>
+                </div>
+            )}
+
+            {!data?.group && (
+                <div className="ml-4">
+                    <h1 className="text-white text-2xl">{name}</h1>
+                    <p className="text-[#d6d6d6] text-sm">
+                        {online
+                            ? 'Online'
+                            : `Last seen at ${formatLocalTime(lastSeen)}`}
+                    </p>
+                </div>
+            )}
         </div>
     );
 }
 
-export default ConversationBoxHeader;
+export default memo(ConversationBoxHeader);

@@ -12,11 +12,12 @@ import {
     IconButton,
 } from '@mui/material';
 import WavesurferPlayer from '@wavesurfer/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 import messageService from '../services/MessageService';
 import { formatLocalTime } from '../utils/formatTime';
 import { tranferFileSize } from '../utils/tranferFileSize';
+import SingleAvatar from './common/SingleAvatar';
 
 function MessageCard({ data, isYour, presentAvt, viewImg }) {
     const { accessToken, socket } = useAppContext();
@@ -75,16 +76,9 @@ function MessageCard({ data, isYour, presentAvt, viewImg }) {
                     }`}
                 >
                     {!isYour && presentAvt && (
-                        <Avatar
-                            src={data.user.avatar || ''}
-                            sx={{
-                                '&': {
-                                    height: '32px',
-                                    width: '32px',
-                                    alignSelf: 'end',
-                                },
-                            }}
-                        />
+                        <div className="self-end">
+                            <SingleAvatar data={data.user} size={'s'} />
+                        </div>
                     )}
                     {data.active && data.type === 'text' && (
                         <p
@@ -304,4 +298,4 @@ function MessageCard({ data, isYour, presentAvt, viewImg }) {
     );
 }
 
-export default MessageCard;
+export default memo(MessageCard);

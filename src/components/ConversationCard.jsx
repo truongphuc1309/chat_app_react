@@ -1,16 +1,15 @@
-import { Avatar, AvatarGroup } from '@mui/material';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
 import messageService from '../services/MessageService';
 
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { ConversationContext } from '../contexts/ConversationContext';
-import WebSocketService from '../services/WebSocketService';
 import { formatTime } from '../utils/formatTime';
+import ConversationAvatar from './common/ConversationAvatar';
 
 function ConversationCard({ data }) {
-    const { user, accessToken, socket } = useAppContext();
+    const { user, accessToken, socket, conversation } = useAppContext();
     const navigate = useNavigate();
     const { id } = useParams();
     const [name, setName] = useState('');
@@ -20,8 +19,8 @@ function ConversationCard({ data }) {
     const [active, setActive] = useState(false);
     const [lastMessage, setLastMessage] = useState(null);
     const [time, setTime] = useState('');
-    const { conversation } = useContext(ConversationContext);
     const { setOpenConversationBox } = conversation;
+    const [subscription, setSubscription] = useState(null);
 
     const getLastMessage = async () => {
         const result = await messageService.getLastMessageOfConversation({
@@ -29,37 +28,41 @@ function ConversationCard({ data }) {
             conversationId: data.id,
         });
         if (result.success) {
-            const message = result.metaData;
-            const updatedAt = message.updatedAt;
-
+            const message = result?.metaData;
+            const updatedAt = message?.updatedAt;
             setTime(formatTime(updatedAt));
-            if (message.active) {
-                if (message.type === 'text')
+
+            if (result.metaData) {
+                if (message.active) {
+                    if (message.type === 'text')
+                        setLastMessage(
+                            `${
+                                message.user.id === user.id
+                                    ? `You`
+                                    : `${message.user.name}`
+                            }: ${message.content}`
+                        );
+                    else if (
+                        ['image', 'video', 'file', 'audio'].includes(
+                            message.type
+                        )
+                    )
+                        setLastMessage(
+                            `${
+                                message.user.id === user.id
+                                    ? `You`
+                                    : `${message.user.name}`
+                            } sent a ${message.type}`
+                        );
+                } else
                     setLastMessage(
                         `${
                             message.user.id === user.id
                                 ? `You`
                                 : `${message.user.name}`
-                        }: ${message.content}`
+                        } unsent a ${message.type}`
                     );
-                else if (
-                    ['image', 'video', 'file', 'audio'].includes(message.type)
-                )
-                    setLastMessage(
-                        `${
-                            message.user.id === user.id
-                                ? `You`
-                                : `${message.user.name}`
-                        } sent a ${message.type}`
-                    );
-            } else
-                setLastMessage(
-                    `${
-                        message.user.id === user.id
-                            ? `You`
-                            : `${message.user.name}`
-                    } unsent a ${message.type}`
-                );
+            }
         } else {
             setLastMessage('');
             setTime('');
@@ -83,9 +86,15 @@ function ConversationCard({ data }) {
         handleAvatarAndName(data, user);
         getLastMessage();
 
-        socket.subscribe(`/topic/message/last/${data.id}`, (mess) =>
-            getLastMessage()
+        setSubscription(
+            socket.subscribe(`/topic/message/last/${data.id}`, (mess) =>
+                getLastMessage()
+            )
         );
+
+        return () => {
+            if (subscription) subscription.unsubcribe();
+        };
     }, [data]);
 
     useEffect(() => {
@@ -102,42 +111,7 @@ function ConversationCard({ data }) {
                 setOpenConversationBox(true);
             }}
         >
-            <div className="w-[30%] flex items-center justify-center">
-                {isGroup && !avatar && (
-                    <AvatarGroup
-                        total={total}
-                        max={3}
-                        variant="circular"
-                        className="flex items-center mr-2"
-                        sx={{
-                            '& .MuiAvatar-root': {
-                                height: '34px',
-                                width: '34px',
-                            },
-                        }}
-                    >
-                        {data.members[0] && (
-                            <Avatar
-                                sx={{ bgcolor: 'var(--primary)' }}
-                                src={data.members[0].avatar || ''}
-                            ></Avatar>
-                        )}
-                        {data.members[1] && (
-                            <Avatar
-                                sx={{ bgcolor: 'var(--primary)' }}
-                                src={data.members[1].avatar || ''}
-                            ></Avatar>
-                        )}
-                    </AvatarGroup>
-                )}
-                {(!isGroup || avatar) && (
-                    <Avatar
-                        className="mr-2"
-                        sx={{ width: '68px', height: '68px' }}
-                        src={avatar || ''}
-                    ></Avatar>
-                )}
-            </div>
+            <ConversationAvatar data={data} width={'30%'} />
             <div className="w-[80%] flex flex-col justify-around">
                 <div className="flex items-center justify-between">
                     <h1

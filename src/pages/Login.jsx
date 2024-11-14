@@ -38,13 +38,8 @@ function Login() {
     const [cookies, setCookie] = useCookies(['user']);
 
     useEffect(() => {
-        getProfile();
+        if (cookies.token) navigate('/');
     }, []);
-
-    const getProfile = async () => {
-        const result = await userService.getProfile(cookies.token);
-        if (result.success) navigate('/');
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();

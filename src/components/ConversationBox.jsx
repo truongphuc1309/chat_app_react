@@ -14,7 +14,6 @@ import { useAppContext } from '../contexts/AppContext';
 import { ConversationContext } from '../contexts/ConversationContext';
 import conversationService from '../services/ConversationService';
 import messageService from '../services/MessageService';
-import WebSocketService from '../services/WebSocketService';
 import { formatLocalTime } from '../utils/formatTime';
 import ConversationBoxHeader from './ConversationBoxHeader';
 import ConversationInfo from './ConversationInfo';
@@ -24,23 +23,15 @@ import SendMessage from './SendMessage';
 
 function ConversationBox() {
     const { id } = useParams();
-    const { user, accessToken, socket } = useAppContext();
+    const { user, accessToken, socket, conversation } = useAppContext();
 
     const [subscription, setSubscription] = useState(null);
-    const [data, setData] = useState(null);
-    const [name, setName] = useState('');
-    const [isGroup, setIsGroup] = useState(false);
-    const [avatar, setAvatar] = useState(null);
-    const [total, setTotal] = useState(null);
-    const [email, setEmail] = useState('');
-    const [admin, setAdmin] = useState(false);
     const [messages, setMessages] = useState([]);
     const pageRef = useRef(1);
     const totalPagesRef = useRef(0);
     const conversationIdRef = useRef('');
     const [openGroupInfo, setOpenGroupInfo] = useState(false);
     const [loading, setLoading] = useState(true);
-    const { conversation } = useContext(ConversationContext);
     const { openConversationBox, setOpenConversationBox } = conversation;
     const [viewImg, setViewImg] = useState(null);
     const [loadingFiles, setLoadingFiles] = useState([]);
@@ -96,7 +87,6 @@ function ConversationBox() {
                 setMessages(result.metaData.content);
                 conversationIdRef.current = id;
             } else if (id === conversationIdRef.current) {
-                console.log('call api');
                 setMessages((prev) => [...prev, ...result.metaData.content]);
             }
 
@@ -118,32 +108,11 @@ function ConversationBox() {
         }
     };
 
-    const handleAvatarAndName = (data, user) => {
-        if (!data.group) {
-            const restMember = data.members.find((e) => e?.id !== user?.id);
-            setAvatar(restMember.avatar);
-            setName(restMember.name);
-            setEmail(restMember.email);
-        } else {
-            setName(data.name);
-            setAvatar(data.avatar);
-        }
-    };
-
     const getData = async () => {
         const result = await conversationService.getConversationDetails({
             token: accessToken,
             id,
         });
-
-        if (result.success) {
-            console.log(result);
-            setData(result.metaData);
-            setIsGroup(result.metaData.group);
-            setTotal(result.metaData.members.length);
-            handleAvatarAndName(result.metaData, user);
-            setAdmin(result.metaData.createdBy.id === user.id);
-        }
     };
 
     const closeGroupInfo = () => {
@@ -208,30 +177,11 @@ function ConversationBox() {
             } flex-col lg:b bg-[#ccc7f387]`}
         >
             <ConversationBoxHeader
-                data={data}
-                avatar={avatar}
-                name={name}
-                total={total}
-                isGroup={isGroup}
                 setOpenGroupInfo={setOpenGroupInfo}
                 setOpenConversationBox={setOpenConversationBox}
             />
 
-            {openGroupInfo && (
-                <ConversationInfo
-                    data={{
-                        isGroup,
-                        avatar,
-                        name,
-                        email,
-                        total,
-                        admin,
-                        members: data?.members,
-                    }}
-                    setAvatar={setAvatar}
-                    close={closeGroupInfo}
-                />
-            )}
+            {openGroupInfo && <ConversationInfo close={closeGroupInfo} />}
 
             <div
                 className="flex-1 flex  flex-col-reverse p-[0_20px] overflow-y-scroll overflow-x-hidden no-scrollbar"
