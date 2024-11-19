@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import authService from '../services/AuthService';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { useCookies } from 'react-cookie';
+import ErrorIcon from '@mui/icons-material/Error';
 
 function SendVerification() {
     const textStyle = {
@@ -49,7 +50,10 @@ function SendVerification() {
                 expires: expirationDate,
             });
             setDisable(true);
-        } else setErrorMess(result.message);
+        } else {
+            setErrorMess(result.message);
+            setSuccess(false);
+        }
     };
 
     useEffect(() => {
@@ -58,7 +62,7 @@ function SendVerification() {
 
     return (
         <div className="w-screen h-screen bg-[var(--primary)] flex items-center justify-center">
-            <form className=" bg-white p-12 shadow-[#00000042] shadow-xl sm:w-[420px] sm:h-auto h-[100%] w-[100%] ">
+            <form className=" bg-white p-12 shadow-[#00000042] shadow-xl sm:w-[420px] sm:h-auto h-[100%] w-[100%] rounded-xl">
                 <h1 className="text-[var(--primary)] text-center font-bold text-4xl mb-8">
                     Verify Email
                 </h1>
@@ -99,7 +103,12 @@ function SendVerification() {
                         />
                     )}
                 </Button>
-                <p className="mt-4 text-center text-red-600">{errorMess}</p>
+                {errorMess && (
+                    <p className="mt-4 text-red-600 p-[10px_20px] bg-[#fca5a55a]">
+                        <ErrorIcon className="mr-2" />
+                        {errorMess}
+                    </p>
+                )}
                 {success && (
                     <p className="text-green-600 bg-[#86efad36] p-[10px_20px] mt-4">
                         <DoneAllIcon /> Sent email successfully

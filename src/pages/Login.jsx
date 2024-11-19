@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
 import { Button, CircularProgress, TextField } from '@mui/material';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import authService from '../services/AuthService';
+import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
-import userService from '../services/UserService';
+import { Link, useNavigate } from 'react-router-dom';
+import authService from '../services/AuthService';
+import ErrorIcon from '@mui/icons-material/Error';
 
 function Login() {
     const textStyle = {
@@ -61,7 +61,7 @@ function Login() {
 
     return (
         <div className="w-screen h-screen bg-[var(--primary)] flex items-center justify-center">
-            <form className=" bg-white sm:w-[420px] sm:h-auto h-[100%] w-[100%] p-12 shadow-[#00000042] shadow-xl">
+            <form className=" bg-white sm:w-[420px] sm:h-auto h-[100%] w-[100%] p-12 shadow-[#00000042] shadow-xl rounded-xl">
                 <h1 className="text-[var(--primary)] text-center font-bold text-4xl mb-8">
                     Log In
                 </h1>
@@ -115,24 +115,27 @@ function Login() {
                     )}
                 </Button>
 
-                <p className="mt-4 text-center text-red-600">
-                    {errorMess}
-                    {sendEmail && (
-                        <Button
-                            sx={{
-                                marginLeft: '4px',
-                                textTransform: 'none',
-                            }}
-                            onClick={() => navigate('/send-verification')}
-                        >
-                            Send Email
-                        </Button>
-                    )}
-                </p>
+                {errorMess && (
+                    <p className="mt-4 text-center text-red-600 p-[10px_10px] bg-[#fca5a55a]">
+                        <ErrorIcon className="mr-2" />
+                        {errorMess}
+                        {sendEmail && (
+                            <Button
+                                sx={{
+                                    marginLeft: '4px',
+                                    textTransform: 'none',
+                                }}
+                                onClick={() => navigate('/send-verification')}
+                            >
+                                Send Email
+                            </Button>
+                        )}
+                    </p>
+                )}
 
                 <Link
                     to="/forgot-password"
-                    className="ml-2 text-[1rem] text-blue-400 block text-center underline"
+                    className="mt-2 ml-2 text-[1rem] text-blue-400 block text-center underline"
                 >
                     Forgot password?
                 </Link>

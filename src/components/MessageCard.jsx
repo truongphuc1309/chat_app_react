@@ -3,7 +3,6 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import {
-    Avatar,
     Button,
     CircularProgress,
     Dialog,
@@ -14,13 +13,20 @@ import {
 import WavesurferPlayer from '@wavesurfer/react';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
-import messageService from '../services/MessageService';
+import {
+    default as messageService,
+    default as MessageService,
+} from '../services/MessageService';
 import { formatLocalTime } from '../utils/formatTime';
 import { tranferFileSize } from '../utils/tranferFileSize';
 import SingleAvatar from './common/SingleAvatar';
+import ReadUserAvatars from './ReadUserAvatars';
+import { useConversationContext } from '../contexts/ConversationContext';
 
-function MessageCard({ data, isYour, presentAvt, viewImg }) {
-    const { accessToken, socket } = useAppContext();
+function MessageCard({ data, isYour, presentAvt, viewImg, isLast }) {
+    const { accessToken, socket, user } = useAppContext();
+    const { data: conversationData } = useConversationContext();
+
     const messageElementRef = useRef();
     const time = formatLocalTime(data.createdAt);
     const [isHover, setIsHover] = useState(false);
@@ -52,12 +58,36 @@ function MessageCard({ data, isYour, presentAvt, viewImg }) {
         setWavesurfer(ws);
     };
 
+    const handleReadLastMessage = async () => {
+        const thisMember = conversationData.members.find(
+            (e) => e.id === user.id
+        );
+        if (isLast && thisMember.lastRead < data.seq) {
+            const result = await MessageService.readLastMessage({
+                token: accessToken,
+                messageId: data.id,
+            });
+
+            if (result.success) {
+                socket.send(
+                    '/app/message/last-read',
+                    {},
+                    JSON.stringify(result.metaData)
+                );
+            }
+        }
+    };
+
     useEffect(() => {
         if (messageElementRef.current) {
             const { offsetWidth } = messageElementRef.current;
             setWaveWidth((offsetWidth * 40) / 100);
         }
     }, []);
+
+    useEffect(() => {
+        handleReadLastMessage();
+    }, [data]);
 
     return (
         <>
@@ -253,6 +283,7 @@ function MessageCard({ data, isYour, presentAvt, viewImg }) {
                         </div>
                     )}
                 </div>
+                {isLast && <ReadUserAvatars isYour={isYour} message={data} />}
             </div>
             <Dialog
                 open={openDeletePopUp}

@@ -75,6 +75,21 @@ class MessageService {
                 })
         );
     };
+
+    static readLastMessage = async ({ token, messageId }) => {
+        return await handleApiResponse(
+            async () =>
+                await apiUrl.post(
+                    `message/last-read/${messageId}`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                )
+        );
+    };
 }
 
 export default MessageService;

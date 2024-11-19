@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import authService from '../services/AuthService';
 import NotFound from './NotFound';
+import ErrorIcon from '@mui/icons-material/Error';
 
 function ResetPassword() {
     const textStyle = {
@@ -128,6 +129,7 @@ function ResetPassword() {
 
                     {errorMess && (
                         <p className="mt-4 text-red-600 p-[10px_20px] bg-[#fca5a55a]">
+                            <ErrorIcon className="mr-2" />
                             {errorMess}
                         </p>
                     )}

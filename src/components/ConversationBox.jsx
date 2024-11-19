@@ -159,6 +159,7 @@ function ConversationBox() {
                         isYour={e.user.id === user.id}
                         presentAvt={presentAvt}
                         viewImg={setViewImg}
+                        isLast={index === 0}
                     />
                     {index === arr.length - 1 && (
                         <p className="text-center mt-6">

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import authService from '../services/AuthService';
+import ErrorIcon from '@mui/icons-material/Error';
 
 function ForgotPassword() {
     const textStyle = {
@@ -43,19 +44,15 @@ function ForgotPassword() {
         if (result.success) {
             setSuccess(true);
             setErrorMess('');
-            // const expirationDate = new Date();
-            // expirationDate.setTime(expirationDate.getTime() + 30 * 60 * 1000); // 30 phút
-            // setCookie('disable', 'true', {
-            //     path: '/',
-            //     expires: expirationDate,
-            // });
-            // setDisable(true);
-        } else setErrorMess(result.message);
+        } else {
+            setErrorMess(result.message);
+            setSuccess(false);
+        }
     };
 
     return (
         <div className="w-screen h-screen bg-[var(--primary)] flex items-center justify-center">
-            <form className=" bg-white p-12 shadow-[#00000042] shadow-xl sm:w-[460px] sm:h-auto h-[100%] w-[100%]">
+            <form className=" bg-white p-12 shadow-[#00000042] shadow-xl sm:w-[460px] sm:h-auto h-[100%] w-[100%] rounded-xl">
                 <h1 className="text-[var(--primary)] text-center font-bold text-4xl mb-8">
                     Forgot Password
                 </h1>
@@ -98,6 +95,7 @@ function ForgotPassword() {
                 </Button>
                 {errorMess && (
                     <p className="mt-4 text-red-600 p-[10px_20px] bg-[#fca5a55a]">
+                        <ErrorIcon className="mr-2" />
                         {errorMess}
                     </p>
                 )}

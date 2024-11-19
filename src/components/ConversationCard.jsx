@@ -93,7 +93,7 @@ function ConversationCard({ data }) {
         );
 
         return () => {
-            if (subscription) subscription.unsubcribe();
+            if (subscription) subscription.unsubscribe();
         };
     }, [data]);
 

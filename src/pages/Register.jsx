@@ -13,6 +13,7 @@ import authService from '../services/AuthService';
 import { useCookies } from 'react-cookie';
 import MailIcon from '@mui/icons-material/Mail';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import ErrorIcon from '@mui/icons-material/Error';
 
 function Register() {
     const textStyle = {
@@ -98,7 +99,7 @@ function Register() {
 
     return (
         <div className="w-screen h-screen bg-[var(--primary)] flex items-center justify-center">
-            <form className=" bg-white sm:w-[420px] sm:h-auto h-[100%] w-[100%] p-10 shadow-[#00000042] shadow-xl">
+            <form className=" bg-white sm:w-[420px] sm:h-auto h-[100%] w-[100%] p-10 shadow-[#00000042] shadow-xl rounded-xl">
                 <h1 className="text-[var(--primary)] text-center font-bold text-4xl mb-8">
                     Register
                 </h1>
@@ -177,7 +178,12 @@ function Register() {
                     )}
                 </Button>
 
-                <p className="mt-4 text-center text-red-600">{errorMess}</p>
+                {errorMess && (
+                    <p className="mt-4 text-red-600 p-[10px_20px] bg-[#fca5a55a]">
+                        <ErrorIcon className="mr-2" />
+                        {errorMess}
+                    </p>
+                )}
 
                 <div className="text-center text-[1rem] mt-[14px] text-[#9188d9]">
                     Have an account?

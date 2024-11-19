@@ -13,6 +13,7 @@ function ConversationProvider({ children }) {
 
     const getConversationInfo = async () => {
         if (id) {
+            setLoading(true);
             const result = await ConversationService.getConversationDetails({
                 id,
                 token: accessToken,
