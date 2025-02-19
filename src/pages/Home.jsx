@@ -1,26 +1,36 @@
-import React, { useEffect } from 'react';
-import SideBar from '../components/SideBar';
-import { useCookies } from 'react-cookie';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import AppProvider from '../contexts/AppContext';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import ConversationBox from '../components/ConversationBox';
+import SideBar from '../components/SideBar';
+import AppProvider from '../contexts/AppContext';
 import ConversationProvider from '../contexts/ConversationContext';
 
 function Home() {
-    const navigate = useNavigate();
-    const [cookies, setCookie, removeCookie] = useCookies(['user']);
     const { id } = useParams();
+    const theme = createTheme({
+        palette: {
+            primary: {
+                main: '#4e426d',
+            },
+            green: {
+                main: '#3ec5b7',
+            },
+        },
+    });
 
     return (
         <AppProvider>
-            <div className="bg-[url('https://t3.ftcdn.net/jpg/01/99/79/88/360_F_199798806_PAFfWGapie6Mk8igqKHbhIIa9LwQcvQr.jpg')] bg-repeat bg-center h-screen flex">
-                <SideBar />
-                {id && (
-                    <ConversationProvider>
-                        <ConversationBox />
-                    </ConversationProvider>
-                )}
-            </div>
+            <ThemeProvider theme={theme}>
+                <div className="bg-[var(--primary)] h-screen flex">
+                    <SideBar />
+                    {id && (
+                        <ConversationProvider>
+                            <ConversationBox />
+                        </ConversationProvider>
+                    )}
+                </div>
+            </ThemeProvider>
         </AppProvider>
     );
 }

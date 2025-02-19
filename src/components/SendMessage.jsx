@@ -17,6 +17,7 @@ import {
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
+import useOutsideClick from '../hooks/useOutsideClick';
 import messageService from '../services/MessageService';
 import AudioMessageRecorder from './AudioMessageRecorder';
 import SendFileMessage from './SendFileMessage';
@@ -25,18 +26,17 @@ import SendImgVideoMessage from './SendImgVideoMessage';
 function SendMessage({ setLoadingFiles }) {
     const textFieldStyle = {
         '&.MuiTextField-root': {
-            backGroundColor: '#000',
             '.MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--primary)',
+                borderColor: 'transparent',
             },
 
             '.MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--primary)',
+                borderColor: 'transparent',
                 borderWidth: '3px',
             },
 
             '.MuiInputBase-root': {
-                backgroundColor: '#ccc7f3cc',
+                backgroundColor: '#fff',
             },
 
             '.MuiInputBase-input': {
@@ -51,6 +51,7 @@ function SendMessage({ setLoadingFiles }) {
     const [iconList, setIconList] = useState(false);
     const [openRecorder, setOpenRecorder] = useState(false);
     const [input, setInput] = useState('');
+    const uploadOptionsRef = useOutsideClick(() => setOpenUploadOptions(false));
 
     const handleSendMessage = async () => {
         if (input.length > 0) {
@@ -75,16 +76,26 @@ function SendMessage({ setLoadingFiles }) {
             <div className="w-[64px] flex items-center justify-center">
                 <IconButton
                     type="submit"
+                    sx={{
+                        color: '#fff',
+                        padding: '20px',
+                        height: '46px',
+                        width: '46px',
+                        '&.MuiIconButton-root': {
+                            backgroundColor: 'var(--orange)',
+                        },
+                    }}
                     onClick={() => {
                         setOpenRecorder(true);
                     }}
                 >
-                    <MicIcon className="text-[var(--primary)] !text-[2rem]" />
+                    <MicIcon className="text-white !text-[2rem]" />
                 </IconButton>
             </div>
             <FormControl className="flex-1 relative">
                 <TextField
                     autoComplete="off"
+                    placeholder="Type a message"
                     className="rounded-sm"
                     size="normal"
                     variant="outlined"
@@ -124,9 +135,16 @@ function SendMessage({ setLoadingFiles }) {
                                 className="cursor-pointer"
                             >
                                 <IconButton
-                                    onClick={(e) =>
-                                        setOpenUploadOptions(!openUploadOptions)
-                                    }
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+
+                                        setOpenUploadOptions(
+                                            !openUploadOptions
+                                        );
+                                    }}
+                                    sx={{
+                                        transform: 'rotate(20deg)',
+                                    }}
                                 >
                                     <AttachFileIcon className="text-[var(--primary)] !text-[1.8rem]" />
                                 </IconButton>
@@ -135,7 +153,10 @@ function SendMessage({ setLoadingFiles }) {
                     }}
                 />
                 {openUploadOptions && (
-                    <div className="absolute bg-[var(--primary)] min-w-[160px] bottom-[100%] right-0 mb-[10px] rounded-xl text-white z-[99]">
+                    <div
+                        ref={uploadOptionsRef}
+                        className="absolute bg-[var(--primary)] min-w-[160px] bottom-[100%] right-0 mb-[10px] rounded-xl text-white z-[99]"
+                    >
                         <List>
                             <ListItemButton
                                 onClick={(e) => {
@@ -169,7 +190,7 @@ function SendMessage({ setLoadingFiles }) {
                             onEmojiSelect={(e) =>
                                 setInput((pre) => pre + e.native)
                             }
-                            theme="light"
+                            theme="dark"
                             onClickOutside={(e) => {
                                 if (iconList === true) setIconList(false);
                             }}
@@ -184,8 +205,18 @@ function SendMessage({ setLoadingFiles }) {
                         handleSendMessage();
                         setInput('');
                     }}
+                    sx={{
+                        color: '#fff',
+                        padding: '20px',
+                        height: '46px',
+                        width: '46px',
+                        transform: 'rotate(-20deg)',
+                        '&.MuiIconButton-root': {
+                            backgroundColor: 'var(--green)',
+                        },
+                    }}
                 >
-                    <SendIcon className="text-[var(--primary)] !text-[1.8rem]" />
+                    <SendIcon className="text-white !text-[1.8rem]" />
                 </IconButton>
             </div>
             {openRecorder && (

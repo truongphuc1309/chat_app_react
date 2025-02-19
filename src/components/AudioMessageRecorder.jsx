@@ -108,7 +108,7 @@ const AudioMessageRecorder = ({ setOpenRecorder, setLoadingFiles }) => {
     useEffect(() => {
         if (recordPlayerRef.current) {
             const { offsetWidth } = recordPlayerRef.current;
-            setWaveWidth(offsetWidth - 140);
+            setWaveWidth(offsetWidth - 200);
         }
     }, [audioUrl]);
 
@@ -117,9 +117,9 @@ const AudioMessageRecorder = ({ setOpenRecorder, setLoadingFiles }) => {
     }, [audioBlobs]);
 
     return (
-        <div className="bg-[var(--third)] absolute top-0 bottom-0 right-0 left-0 flex items-center">
+        <div className="bg-[var(--secondary)] absolute top-0 bottom-0 right-0 left-0 flex items-center rounded-2xl">
             <IconButton
-                className="!mr-[10px] !ml-[10px]"
+                className="!mr-[10px] !ml-[20px]"
                 onClick={closeRecorder}
             >
                 <CancelIcon className="!text-[2rem] text-red-500" />
@@ -128,23 +128,23 @@ const AudioMessageRecorder = ({ setOpenRecorder, setLoadingFiles }) => {
                 <div className="flex items-center flex-1">
                     <ReactMic
                         record={record}
-                        className="sound-wave flex-1 !h-[80px]"
+                        className="sound-wave flex-1 !h-[60px]"
                         onStop={onStop}
-                        strokeColor="#9188d9"
-                        backgroundColor="#ccc7f3"
+                        strokeColor="#917bcf"
+                        backgroundColor="#5c4e81"
                         audioBitsPerSecond={240000} // Tăng chất lượng âm thanh
                         echoCancellation={true} // Bỏ tiếng vang
                         autoGainControl={true}
                     />
 
-                    <p className="ml-2 text-[var(--primary)]">
+                    <p className="ml-2 text-white">
                         {formatTimestamp(timestamp)}
                     </p>
                     <IconButton
                         className="!mr-[10px] !ml-[10px]"
                         onClick={stopRecording}
                     >
-                        <StopIcon className="!text-[2rem] text-[var(--primary)]" />
+                        <StopIcon className="!text-[2rem] text-white" />
                     </IconButton>
                 </div>
             )}
@@ -159,13 +159,15 @@ const AudioMessageRecorder = ({ setOpenRecorder, setLoadingFiles }) => {
                             if (!isPlaying) wavesurfer.play();
                             else wavesurfer.pause();
                         }}
-                        className="!w-[40px] !h-[40px] mr-[20px]"
+                        sx={{
+                            marginRight: '10px',
+                        }}
                     >
                         {!isPlaying && (
-                            <PlayCircleIcon className="text-[var(--primary)] !text-[2rem]" />
+                            <PlayCircleIcon className="text-white !text-[2rem]" />
                         )}
                         {isPlaying && (
-                            <PauseCircleIcon className="text-[var(--primary)] !text-[2rem]" />
+                            <PauseCircleIcon className="text-white !text-[2rem]" />
                         )}
                     </IconButton>
 
@@ -187,12 +189,21 @@ const AudioMessageRecorder = ({ setOpenRecorder, setLoadingFiles }) => {
                             setAudioUrl(null);
                             setTimeout(startRecording, 1);
                         }}
+                        sx={{
+                            marginLeft: '10px',
+                        }}
                     >
-                        <MicIcon className="text-[var(--primary)] !text-[2rem]" />
+                        <MicIcon className="text-[var(--orange)] !text-[2rem]" />
                     </IconButton>
 
-                    <IconButton className="ml-6" onClick={handleSendAudioFile}>
-                        <SendIcon className="text-[var(--primary)] !text-[2rem]" />
+                    <IconButton
+                        className="ml-6"
+                        onClick={handleSendAudioFile}
+                        sx={{
+                            marginLeft: '10px',
+                        }}
+                    >
+                        <SendIcon className="text-[var(--green)] !text-[2rem]" />
                     </IconButton>
                 </div>
             )}

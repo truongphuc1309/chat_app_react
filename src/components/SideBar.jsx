@@ -3,6 +3,7 @@ import { AppContext, useAppContext } from '../contexts/AppContext';
 import { ConversationContext } from '../contexts/ConversationContext';
 import Contacts from './Contacts';
 import Profile from './Profile';
+import SideBarHeader from './SideBarHeader';
 
 function SideBar() {
     const innerWidth = window.innerWidth;
@@ -16,10 +17,11 @@ function SideBar() {
 
     return (
         <div
-            className={`relative bg-[var(--secondary)] lg:w-[30%] md:w-[340px] md:block ${
+            className={`relative bg-transparent lg:w-[30%] md:w-[340px] md:block ${
                 !openConversationBox ? 'block' : 'hidden'
-            } w-[100%] h-screen p-2 flex flex-col`}
+            } w-[100%] p-[14px] flex flex-col`}
         >
+            <SideBarHeader />
             <Contacts />
             {openProfile && <Profile />}
         </div>

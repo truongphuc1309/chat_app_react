@@ -9,16 +9,16 @@ import React, { useState } from 'react';
 import conversationService from '../services/ConversationService';
 import resetFileInput from '../utils/resetFileInput';
 import { useAppContext } from '../contexts/AppContext';
+import { useConversationContext } from '../contexts/ConversationContext';
 
 function ChangeConversationAvatar({
     open,
     setStatus,
-    reloadAvt,
     haveAvt,
     conversationId,
 }) {
-    const { accessToken } = useAppContext();
-
+    const { accessToken, socket } = useAppContext();
+    const { data } = useConversationContext();
     const [previewAvt, setPreviewAvt] = useState('');
     const [openPreviewAvtPopUp, setOpenPreviewAvtPopUp] = useState(false);
     const [avtFile, setAvtFile] = useState(null);
@@ -38,7 +38,14 @@ function ChangeConversationAvatar({
             id: conversationId,
         });
 
-        if (result.success) reloadAvt(result.metaData.avatar);
+        if (result.success) {
+            data.avatar = result.metaData.avatar;
+            socket.send(
+                '/app/conversation/change-data',
+                {},
+                JSON.stringify(data)
+            );
+        }
         URL.revokeObjectURL(previewAvt);
         setLoading(false);
         setOpenPreviewAvtPopUp(false);
@@ -53,7 +60,12 @@ function ChangeConversationAvatar({
         });
         if (result.success) {
             setRemoveLoading(false);
-            reloadAvt(null);
+            data.avatar = null;
+            socket.send(
+                '/app/conversation/change-data',
+                {},
+                JSON.stringify(data)
+            );
             setStatus(false);
         }
     };
@@ -91,7 +103,7 @@ function ChangeConversationAvatar({
                         }}
                         onClick={handleUploadImg}
                         variant="contained"
-                        color="secondary"
+                        color="primary"
                     >
                         Change avatar
                     </Button>
@@ -122,8 +134,8 @@ function ChangeConversationAvatar({
                             width: '100%',
                             padding: '20px',
                         }}
-                        color="secondary"
-                        variant="text"
+                        color="primary"
+                        variant="outlined"
                         onClick={(e) => {
                             setStatus(false);
                         }}
@@ -158,7 +170,7 @@ function ChangeConversationAvatar({
                             width: '100%',
                             padding: '20px',
                         }}
-                        color="secondary"
+                        color="primary"
                         variant="outlined"
                         onClick={(e) => {
                             URL.revokeObjectURL(previewAvt);
@@ -175,7 +187,7 @@ function ChangeConversationAvatar({
                         }}
                         onClick={handleChangeAvatar}
                         variant="contained"
-                        color="secondary"
+                        color="primary"
                     >
                         {loading && (
                             <CircularProgress

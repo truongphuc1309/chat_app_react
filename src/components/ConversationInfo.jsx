@@ -12,6 +12,7 @@ import {
     Dialog,
     DialogActions,
     DialogTitle,
+    IconButton,
     List,
     ListItemButton,
     ListItemIcon,
@@ -30,8 +31,7 @@ import { useConversationContext } from '../contexts/ConversationContext';
 
 function ConversationInfo({ close }) {
     const { data } = useConversationContext();
-
-    const { user, accessToken } = useAppContext();
+    const { user, accessToken, socket } = useAppContext();
     const { id } = useParams();
 
     const [partner, setPartner] = useState(null);
@@ -53,20 +53,45 @@ function ConversationInfo({ close }) {
     }, []);
 
     const handleDeleleteGroup = async () => {
-        await conversationService.deleteGroup({
+        const result = await conversationService.deleteGroup({
             token: accessToken,
             conversationId: id,
         });
 
+        if (result.success)
+            socket.send('/app/conversation/delete', {}, JSON.stringify(data));
         navigate('/c/');
     };
 
     const handleLeaveGroup = async () => {
-        await conversationService.leaveGroup({
+        const result = await conversationService.leaveGroup({
             token: accessToken,
             conversationId: id,
             memberId: user.id,
         });
+
+        if (result.success) {
+            const members = data.members;
+            const newMembers = members.filter((e) => e.id !== user.id);
+            const newData = data;
+            const removeData = data;
+
+            // update conversation data
+            newData.members = newMembers;
+            socket.send(
+                '/app/conversation/change-data',
+                {},
+                JSON.stringify(newData)
+            );
+
+            // remove member from conversation
+            removeData.members = [user];
+            socket.send(
+                '/app/conversation/delete',
+                {},
+                JSON.stringify(removeData)
+            );
+        }
 
         navigate('/c/');
     };
@@ -88,47 +113,57 @@ function ConversationInfo({ close }) {
     };
 
     return (
-        <div className="bg-[var(--third)] absolute top-0 right-0 left-0 h-screen p-[20px_40px] flex flex-col items-center overflow-scroll z-[999]">
-            <Button
-                color="secondary"
+        <div className="bg-[var(--secondary)] absolute top-[14px] right-[14px] left-[14px] bottom-[14px] p-[32px_40px] flex flex-col items-center overflow-y-scroll z-[999] rounded-2xl">
+            <IconButton
                 sx={{
                     position: 'absolute',
-                    top: '26px',
+                    top: '34px',
                     left: '40px',
+                    height: '40px',
+                    width: '40px',
+                    '&.MuiIconButton-root': {
+                        backgroundColor: 'var(--primary)',
+                    },
                 }}
                 onClick={close}
             >
-                <WestIcon />
-            </Button>
-            <h1 className="text-[2rem] text-[var(--primary)] font-semibold text-center">
+                <WestIcon className="text-[#aaa4d5] !text-[1.6rem]" />
+            </IconButton>
+            <h1 className="text-[2rem] text-white font-semibold text-center mb-8">
                 {group ? 'Group Info' : 'User Info'}
             </h1>
             <ConversationAvatar data={data} width={'200px'} size={'large'} />
-            <h1 className="text-[3rem] text-[var(--primary)] text-center">
-                {name}
+            <h1 className="text-[3rem] text-[var(--orange)] text-center">
+                {data.group ? name : partner?.name}
             </h1>
             <div className="w-[400px] mt-8">
                 {!group && (
                     <div>
-                        <h1 className="text-[var(--primary)] text-[1.4rem]">
-                            Email
-                        </h1>
-                        <p className="text-[#818080] text-[1.2rem] tracking-widest">
+                        <h1 className="text-white text-[1.4rem]">Email</h1>
+                        <p className="text-[var(--purple-light)] text-[1.2rem] tracking-widest">
                             {partner?.email}
                         </p>
                     </div>
                 )}
                 {group && (
                     <div>
-                        <div>
-                            <ListItemButton onClick={handleOpenEditList}>
-                                <ListItemText className="text-[var(--primary)]">
+                        <div className="mb-[1px]">
+                            <ListItemButton
+                                onClick={handleOpenEditList}
+                                sx={{
+                                    backgroundColor: 'var(--primary)',
+                                    '&:hover': {
+                                        backgroundColor: 'var(--primary)',
+                                    },
+                                }}
+                            >
+                                <ListItemText className="text-white">
                                     Edit
                                 </ListItemText>
                                 {openEditList ? (
-                                    <ExpandLess className="text-[var(--primary)]" />
+                                    <ExpandLess className="text-white" />
                                 ) : (
-                                    <ExpandMore className="text-[var(--primary)]" />
+                                    <ExpandMore className="text-white" />
                                 )}
                             </ListItemButton>
                             <Collapse
@@ -136,7 +171,14 @@ function ConversationInfo({ close }) {
                                 timeout="auto"
                                 unmountOnExit
                             >
-                                <List component="div" disablePadding>
+                                <List
+                                    component="div"
+                                    disablePadding
+                                    sx={{
+                                        backgroundColor: 'var(--primary-2)',
+                                        color: '#fff',
+                                    }}
+                                >
                                     {admin && (
                                         <>
                                             <ListItemButton
@@ -148,7 +190,7 @@ function ConversationInfo({ close }) {
                                                 }}
                                             >
                                                 <ListItemIcon>
-                                                    <AbcIcon />
+                                                    <AbcIcon className="text-white" />
                                                 </ListItemIcon>
                                                 <ListItemText primary="Change group name" />
                                             </ListItemButton>
@@ -159,7 +201,7 @@ function ConversationInfo({ close }) {
                                                 }
                                             >
                                                 <ListItemIcon>
-                                                    <ImageIcon />
+                                                    <ImageIcon className="text-white" />
                                                 </ListItemIcon>
                                                 <ListItemText primary="Change group avatar" />
                                             </ListItemButton>
@@ -172,7 +214,7 @@ function ConversationInfo({ close }) {
                                                 }}
                                             >
                                                 <ListItemIcon>
-                                                    <GroupAddIcon />
+                                                    <GroupAddIcon className="text-white" />
                                                 </ListItemIcon>
                                                 <ListItemText primary="Add members" />
                                             </ListItemButton>
@@ -213,14 +255,22 @@ function ConversationInfo({ close }) {
                         </div>
 
                         <div>
-                            <ListItemButton onClick={handleOpenMemberList}>
-                                <ListItemText className="text-[var(--primary)] text-[1.4rem]">
+                            <ListItemButton
+                                onClick={handleOpenMemberList}
+                                sx={{
+                                    backgroundColor: 'var(--primary)',
+                                    '&:hover': {
+                                        backgroundColor: 'var(--primary)',
+                                    },
+                                }}
+                            >
+                                <ListItemText className="text-white text-[1.4rem]">
                                     {`Member (${members.length})`}
                                 </ListItemText>
                                 {openMemberList ? (
-                                    <ExpandLess className="text-[var(--primary)]" />
+                                    <ExpandLess className="text-white" />
                                 ) : (
-                                    <ExpandMore className="text-[var(--primary)]" />
+                                    <ExpandMore className="text-white" />
                                 )}
                             </ListItemButton>
                             <Collapse
@@ -228,7 +278,14 @@ function ConversationInfo({ close }) {
                                 timeout="auto"
                                 unmountOnExit
                             >
-                                <List component="div" disablePadding>
+                                <List
+                                    component="div"
+                                    disablePadding
+                                    sx={{
+                                        color: '#fff',
+                                        backgroundColor: 'var(--primary-2)',
+                                    }}
+                                >
                                     {members.map((e, index) => (
                                         <MemberCard
                                             data={e}
@@ -259,18 +316,26 @@ function ConversationInfo({ close }) {
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
-                <DialogTitle id="alert-dialog-title" className="text-center">
-                    Do you want to leave this group?
+                <DialogTitle
+                    id="alert-dialog-title"
+                    className="text-center text-[var(--primary)]"
+                >
+                    Do you want to delete this group?
                 </DialogTitle>
 
                 <DialogActions>
                     <Button
                         color="primary"
+                        variant="contained"
                         onClick={() => setDeletePopUp(false)}
                     >
                         No
                     </Button>
-                    <Button color="error" onClick={handleDeleleteGroup}>
+                    <Button
+                        color="primary"
+                        variant="outlined"
+                        onClick={handleDeleleteGroup}
+                    >
                         Yes
                     </Button>
                 </DialogActions>
@@ -281,18 +346,26 @@ function ConversationInfo({ close }) {
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
-                <DialogTitle id="alert-dialog-title" className="text-center">
-                    Do you want delete this group?
+                <DialogTitle
+                    id="alert-dialog-title"
+                    className="text-center text-[var(--primary)]"
+                >
+                    Do you want to leave this group?
                 </DialogTitle>
 
                 <DialogActions>
                     <Button
-                        color="primary"
+                        color="secondary"
+                        variant="contained"
                         onClick={() => setOpenLeaveGroupPopUp(false)}
                     >
                         No
                     </Button>
-                    <Button color="error" onClick={handleLeaveGroup}>
+                    <Button
+                        color="secondary"
+                        variant="outlined"
+                        onClick={handleLeaveGroup}
+                    >
                         Yes
                     </Button>
                 </DialogActions>
@@ -300,7 +373,6 @@ function ConversationInfo({ close }) {
             <ChangeConversationAvatar
                 open={openChangeAvtPopUp}
                 setStatus={setOpenChangeAvtPopUp}
-                // reloadAvt={setAvatar}
                 haveAvt={avatar !== null}
                 conversationId={id}
             />

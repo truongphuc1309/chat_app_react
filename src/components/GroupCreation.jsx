@@ -80,7 +80,11 @@ function GroupCreation({ handleOpenGroupCreation }) {
                 },
             }}
         >
-            <DialogTitle id="alert-dialog-title" className="text-center">
+            <DialogTitle
+                id="alert-dialog-title"
+                className="text-center text-[var(--primary)]"
+                color="primary"
+            >
                 Create New Group
             </DialogTitle>
             <DialogContent>
@@ -89,7 +93,7 @@ function GroupCreation({ handleOpenGroupCreation }) {
                     id="outlined-basic"
                     label="Group's name"
                     variant="outlined"
-                    color="secondary"
+                    color="primary"
                     value={name}
                     sx={{
                         '&': {
@@ -113,23 +117,28 @@ function GroupCreation({ handleOpenGroupCreation }) {
                         <TextField
                             {...params}
                             label="Select Members"
-                            color="secondary"
+                            color="primary"
                         />
                     )}
                     onChange={handleChangeValue}
                     onInputChange={handleSearch}
                 />
             </DialogContent>
-            <DialogActions>
+            <DialogActions className="!p-[20px_24px]">
                 <Button
-                    color="secondary"
+                    color="primary"
+                    variant="outlined"
                     onClick={() => {
                         handleOpenGroupCreation(false);
                     }}
                 >
                     Close
                 </Button>
-                <Button color="success" onClick={handleSubmit}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                >
                     Create
                 </Button>
             </DialogActions>

@@ -1,8 +1,14 @@
 :root {
     --primary: #4e426d;
+    --primary-2: #4e426d91;
     --secondary: #5c4e81;
     --third: #ccc7f3;
+    --fourth: #c5863ea2;
     --green: #3ec5b7;
+    --green-2: #3ec5b857;
+    --orange: #efaa86;
+    --orange-2: #efab868e;
+    --purple-light: #917bcf;
 }
 
 html {
@@ -29,11 +35,11 @@ code {
 }
 
 #root {
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .primary-audio::-webkit-media-controls-panel {
-    background-color: var(--primary);
+    background-color: #d5935a;
 }
 
 .third-audio::-webkit-media-controls-panel {
@@ -45,6 +51,7 @@ code {
 @tailwind utilities;
 
 @layer utilities {
+
     /* Hide scrollbar for Chrome, Safari and Opera */
     .no-scrollbar::-webkit-scrollbar {
         display: none;
@@ -57,4 +64,27 @@ code {
         scrollbar-width: none;
         /* Firefox */
     }
+}
+
+/* custom srcollbar */
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #6f5ba6;
+    border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }

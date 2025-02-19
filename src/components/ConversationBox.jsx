@@ -8,10 +8,9 @@ import {
     DialogContent,
     DialogTitle,
 } from '@mui/material';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
-import { ConversationContext } from '../contexts/ConversationContext';
 import conversationService from '../services/ConversationService';
 import messageService from '../services/MessageService';
 import { formatLocalTime } from '../utils/formatTime';
@@ -46,7 +45,7 @@ function ConversationBox() {
         }
         setSubscription(
             socket.subscribe(
-                `/topic/conversation/${id}`,
+                `/topic/conversation/messages/${id}`,
                 handleOnReceiveMessage
             )
         );
@@ -149,22 +148,26 @@ function ConversationBox() {
             return (
                 <>
                     {presentTime && (
-                        <p className="text-center mt-6 mb-4">
-                            {formatLocalTime(tempTime)}
-                        </p>
+                        <div className="relative border-b-[1px] border-b-[#ffffff41] w-[100%]  mt-6 mb-4">
+                            <p className="absolute bottom-[-12px] bg-[var(--secondary)] right-[50%] translate-x-[50%] text-white text-center p-[0_10px]">
+                                {formatLocalTime(tempTime)}
+                            </p>
+                        </div>
                     )}
                     <MessageCard
                         data={e}
-                        key={index}
+                        key={e.id}
                         isYour={e.user.id === user.id}
                         presentAvt={presentAvt}
                         viewImg={setViewImg}
                         isLast={index === 0}
                     />
                     {index === arr.length - 1 && (
-                        <p className="text-center mt-6">
-                            {formatLocalTime(currentTimeMess)}
-                        </p>
+                        <div className="relative border-b-[1px] border-b-[#ffffff41] w-[100%]  mt-6 mb-4">
+                            <p className="absolute bottom-[-12px] bg-[var(--secondary)] right-[50%] translate-x-[50%] text-white text-center p-[0_10px]">
+                                {formatLocalTime(currentTimeMess)}
+                            </p>
+                        </div>
                     )}
                 </>
             );
@@ -174,8 +177,8 @@ function ConversationBox() {
     return (
         <div
             className={`relative h-screen flex-1 ${
-                openConversationBox ? 'flex' : 'hidden'
-            } flex-col lg:b bg-[#ccc7f387]`}
+                openConversationBox ? 'flex' : 'flex'
+            } flex-col lg:b bg-transparent p-[14px]`}
         >
             <ConversationBoxHeader
                 setOpenGroupInfo={setOpenGroupInfo}
@@ -183,9 +186,8 @@ function ConversationBox() {
             />
 
             {openGroupInfo && <ConversationInfo close={closeGroupInfo} />}
-
             <div
-                className="flex-1 flex  flex-col-reverse p-[0_20px] overflow-y-scroll overflow-x-hidden no-scrollbar"
+                className="flex-1 flex flex-col-reverse p-[10px_20px] overflow-y-scroll overflow-x-hidden bg-[var(--secondary)] rounded-2xl mt-[14px]"
                 onScroll={handleScroll}
             >
                 {loadingFiles.map((e) => (
@@ -199,6 +201,7 @@ function ConversationBox() {
                     />
                 )}
             </div>
+
             <SendMessage
                 setMessages={setMessages}
                 setLoadingFiles={setLoadingFiles}

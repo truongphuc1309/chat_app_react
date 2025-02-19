@@ -10,9 +10,11 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import conversationService from '../services/ConversationService';
 import { useAppContext } from '../contexts/AppContext';
+import { useConversationContext } from '../contexts/ConversationContext';
 
 function RenameGroup({ open, close }) {
-    const { accessToken } = useAppContext();
+    const { accessToken, socket } = useAppContext();
+    const { data } = useConversationContext();
     const { id } = useParams();
     const [input, setInput] = useState('');
 
@@ -23,6 +25,15 @@ function RenameGroup({ open, close }) {
                 id,
                 name: input,
             });
+
+            if (result.success) {
+                data.name = result.metaData.newName;
+                socket.send(
+                    '/app/conversation/change-data',
+                    {},
+                    JSON.stringify(data)
+                );
+            }
 
             close();
         }
@@ -36,11 +47,14 @@ function RenameGroup({ open, close }) {
                 },
             }}
             open={open}
-            // onClose={handleClose}
+            onClose={close}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
-            <DialogTitle id="alert-dialog-title" className="text-center">
+            <DialogTitle
+                id="alert-dialog-title"
+                className="text-center text-[var(--primary)]"
+            >
                 Change group name
             </DialogTitle>
             <DialogContent>
@@ -58,10 +72,18 @@ function RenameGroup({ open, close }) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button color="secondary" onClick={() => close()}>
+                <Button
+                    color="primary"
+                    variant="outlined"
+                    onClick={() => close()}
+                >
                     Close
                 </Button>
-                <Button color="success" onClick={handleSubmit}>
+                <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={handleSubmit}
+                >
                     Rename
                 </Button>
             </DialogActions>

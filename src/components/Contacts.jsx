@@ -1,8 +1,7 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 import conversationService from '../services/ConversationService';
-import WebSocketService from '../services/WebSocketService';
 import ConversationCard from './ConversationCard';
 import SideBarHeader from './SideBarHeader';
 
@@ -34,11 +33,22 @@ function Contacts() {
         getConversations();
         socket.subscribe(`/topic/conversation/list/${user.id}`, (mess) => {
             const messageData = JSON.parse(mess.body);
-            setData((prev) => {
-                const temp = prev.filter((e) => e.id !== messageData.id);
+            console.log('::Message::', messageData);
+            if (messageData.action === 'ADD')
+                setData((prev) => {
+                    const temp = prev.filter(
+                        (e) => e.id !== messageData.data.id
+                    );
 
-                return [messageData, ...temp];
-            });
+                    return removeDuplicate([messageData.data, ...temp]);
+                });
+            else if (messageData.action === 'DELETE')
+                setData((prev) => {
+                    const temp = prev.filter(
+                        (e) => e.id !== messageData.data.id
+                    );
+                    return removeDuplicate(temp);
+                });
         });
     }, []);
 
@@ -60,26 +70,16 @@ function Contacts() {
     };
 
     return (
-        <div className="flex">
-            <div
-                className={`bg-[var(--secondary)] w-[100%] h-screen p-2 flex flex-col`}
-            >
-                <SideBarHeader />
-                <div
-                    className="overflow-scroll flex flex-col no-scrollbar"
-                    onScroll={handleScroll}
-                >
-                    {data.map((e, index) => (
-                        <ConversationCard data={e} key={index} />
-                    ))}
-                    {loading && (
-                        <CircularProgress
-                            color="secondary"
-                            className="m-[20px_auto]"
-                        />
-                    )}
-                </div>
-            </div>
+        <div
+            className="h-[calc(100%-60px)] bg-[var(--secondary)] overflow-y-scroll flex flex-col rounded-2xl p-[20px]"
+            onScroll={handleScroll}
+        >
+            {data.map((e, index) => (
+                <ConversationCard data={e} key={e.id} />
+            ))}
+            {loading && (
+                <CircularProgress color="secondary" className="m-[20px_auto]" />
+            )}
         </div>
     );
 }

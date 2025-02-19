@@ -132,4 +132,11 @@ const formatTimestamp = (seconds) => {
     )}`;
 };
 
-export { formatTime, formatLocalTime, formatTimestamp };
+const getHours = (string) => {
+    const date = new Date(string);
+    const hours = date.getHours();
+    const mins = date.getMinutes();
+    return `${hours < 10 ? '0' : ''}${hours}:${mins < 10 ? '0' : ''}${mins}`;
+};
+
+export { formatTime, formatLocalTime, formatTimestamp, getHours };

@@ -81,10 +81,10 @@ function SendFileMessage({ setLoadingFiles }) {
                     }}
                 >
                     {previewFileObj.map((e, index) => (
-                        <div className="h-[120px] bg-[var(--primary)] w-[100%] rounded-xl mb-2 flex items-center p-[10px_20px] relative">
+                        <div className="h-[120px] bg-[var(--orange)] w-[100%] rounded-xl mb-2 flex items-center p-[10px_20px] relative">
                             <div className="w-[24%] relative">
                                 <InsertDriveFileIcon className="text-purple-500 !text-[6rem]" />
-                                <p className="absolute top-[50%] right-[50%] translate-x-[50%] text-[1.2rem] text-[var(--secondary)]">
+                                <p className="absolute top-[50%] right-[50%] translate-x-[50%] text-[1.2rem] text-white">
                                     {
                                         e.name.split('.')[
                                             e.name.split('.').length - 1
@@ -93,10 +93,10 @@ function SendFileMessage({ setLoadingFiles }) {
                                 </p>
                             </div>
                             <div className="w-[60%]">
-                                <p className="text-[1.2rem] text-blue-900 w-[100%] truncate">
+                                <p className="text-[1.2rem] text-white w-[100%] truncate">
                                     {e.name}
                                 </p>
-                                <p className="text-[var(--third)]">
+                                <p className="text-white">
                                     {tranferFileSize(e.size)}
                                 </p>
                             </div>
@@ -140,7 +140,7 @@ function SendFileMessage({ setLoadingFiles }) {
                             width: '100%',
                             padding: '20px',
                         }}
-                        color="secondary"
+                        color="primary"
                         variant="outlined"
                         onClick={(e) => {
                             previewFileObj.forEach((e) =>
@@ -162,7 +162,7 @@ function SendFileMessage({ setLoadingFiles }) {
                             setPreviewFilePopUp(false);
                         }}
                         variant="contained"
-                        color="secondary"
+                        color="primary"
                     >
                         Send
                     </Button>

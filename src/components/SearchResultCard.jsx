@@ -26,8 +26,10 @@ function SearchResultCard({ data, closeSearch }) {
             id: data.id,
         });
 
-        if (result.success) navigate(`/c/${result.metaData.id}`);
-        else setOpenCreatePopUp(true);
+        if (result.success) {
+            closeSearch();
+            navigate(`/c/${result.metaData.id}`);
+        } else setOpenCreatePopUp(true);
     };
 
     const handleCreate = async () => {
@@ -50,7 +52,7 @@ function SearchResultCard({ data, closeSearch }) {
     return (
         <div>
             <div
-                className="flex min-h-[100px] justify-between p-[16px_10px] border-b-2 cursor-pointer"
+                className="flex min-h-[100px] justify-between p-[16px_10px] border-b-[0.5px] border-b-[#ffffff1f]  cursor-pointer"
                 onClick={handleClick}
             >
                 <div className="w-[30%] flex items-center justify-center">
@@ -61,7 +63,7 @@ function SearchResultCard({ data, closeSearch }) {
                     ></Avatar>
                 </div>
                 <div className="w-[80%] flex flex-col justify-center">
-                    <p className="truncate text-[var(--primary)] text-[1.2rem]">
+                    <p className="truncate text-[#fff] text-[1.2rem]">
                         {data.name}
                     </p>
                     <p className="truncate text-[#a7a6a6] text-[0.8rem]">

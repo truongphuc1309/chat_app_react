@@ -13,6 +13,7 @@ import {
     DialogActions,
     DialogTitle,
     FormControl,
+    IconButton,
     InputAdornment,
     List,
     ListItemButton,
@@ -27,25 +28,30 @@ import authService from '../services/AuthService';
 import userService from '../services/UserService';
 import GroupCreation from './GroupCreation';
 import SearchResultCard from './SearchResultCard';
+import useOutsideClick from '../hooks/useOutsideClick';
 
 function SideBarHeader() {
     const textStyle = {
         '&.MuiTextField-root': {
+            backgroundColor: 'var(--secondary)',
+            borderRadius: '40px',
+
             '& .MuiInputBase-inputSizeSmall': {
-                color: 'var(--primary)',
+                color: 'var(--purple-light)',
             },
             '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--primary)',
+                borderColor: 'var(--secondary)',
+                borderWidth: '3px',
             },
 
             '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--primary)',
+                borderColor: 'var(--purple-light)',
                 borderWidth: '3px',
                 transition: 'all 0.4s',
             },
 
             '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--primary)',
+                borderColor: 'var(--purple-light)',
                 borderWidth: '3px',
             },
         },
@@ -63,6 +69,7 @@ function SideBarHeader() {
     const [filled, setFilled] = useState(false);
     const [cookies, setCookie, removeCookie] = useCookies(['user']);
 
+    const menuRef = useOutsideClick(() => setOpenMenu(false));
     useEffect(() => {
         if (!search) {
             setSearchInput('');
@@ -120,39 +127,52 @@ function SideBarHeader() {
     return (
         <div className="flex relative justify-between items-center p-[10px_0]">
             {!search && (
-                <Button
+                <IconButton
                     variant="text"
                     color="secondary"
-                    sx={{ textTransform: 'none' }}
+                    sx={{
+                        height: '40px',
+                        width: '40px',
+                        '&.MuiIconButton-root': {
+                            backgroundColor: 'var(--secondary)',
+                        },
+                    }}
                     onClick={(e) => {
+                        e.stopPropagation();
                         setOpenMenu(!openMenu);
                     }}
                 >
                     <MenuIcon
-                        className="cursor-pointer text-[var(--primary)]"
+                        className="cursor-pointer text-[#aaa4d5] !text-[1.6rem]"
                         fontSize="large"
                     ></MenuIcon>
-                </Button>
+                </IconButton>
             )}
 
             {search && (
-                <Button
+                <IconButton
                     variant="text"
                     color="secondary"
-                    sx={{ textTransform: 'none' }}
+                    sx={{
+                        height: '40px',
+                        width: '40px',
+                        '&.MuiIconButton-root': {
+                            backgroundColor: 'var(--secondary)',
+                        },
+                    }}
                     onClick={(e) => {
                         setSearchInput([]);
                         setSearch(false);
                     }}
                 >
                     <WestIcon
-                        className="cursor-pointer text-[var(--primary)]"
+                        className="cursor-pointer !text-[#aaa4d5] !text-[1.6rem]"
                         fontSize="large"
                     />
-                </Button>
+                </IconButton>
             )}
             {openMenu && (
-                <div onClickCapture={(e) => console.log('siuu')}>
+                <div ref={menuRef}>
                     <List
                         sx={{
                             position: 'absolute !important',
@@ -160,9 +180,9 @@ function SideBarHeader() {
                             minWidth: '200px',
                             left: 0,
                             zIndex: 999,
-                            bgcolor: 'var(--third)',
-                            borderRadius: '4px',
-                            boxShadow: '0 0 10px var(--third)',
+                            bgcolor: 'var(--primary)',
+                            borderRadius: '10px',
+                            boxShadow: '0 0 10px var(--purple-light)',
                         }}
                     >
                         <ListItemButton
@@ -234,7 +254,7 @@ function SideBarHeader() {
                                 position="start"
                                 className="cursor-pointer"
                             >
-                                <SearchIcon className="text-[var(--primary)]" />
+                                <SearchIcon className="text-[#aaa4d5]" />
                             </InputAdornment>
                         ),
                         endAdornment: (
@@ -248,7 +268,7 @@ function SideBarHeader() {
                                             setFilled(false);
                                         }}
                                     >
-                                        <ClearIcon className="text-[var(--primary)]" />
+                                        <ClearIcon className="!text-[#aaa4d5]" />
                                     </InputAdornment>
                                 )}
                             </>
@@ -257,7 +277,7 @@ function SideBarHeader() {
                 />
             </FormControl>
             {search && (
-                <div className='className="flex flex-col bg-[var(--secondary)] absolute top-[100%] h-[calc(100vh-100%-8px)] w-[100%] z-[999] overflow-scroll'>
+                <div className='className="flex flex-col bg-[var(--secondary)] absolute top-[100%] h-[calc(100vh-100%-28px)] w-[100%] z-[999] overflow-y-scroll p-[20px] rounded-2xl'>
                     {data.map((e) => (
                         <SearchResultCard
                             data={e}
@@ -276,15 +296,31 @@ function SideBarHeader() {
                 onClose={handleCloseLogoutPopUp}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
+                sx={{
+                    '&.MuiPaper-root': {
+                        width: '200px',
+                    },
+                }}
             >
-                <DialogTitle id="alert-dialog-title">
-                    Do You Want To Log Out?
+                <DialogTitle
+                    id="alert-dialog-title"
+                    className="text-[var(--primary)] !p-[20px]"
+                >
+                    Do you want to log out?
                 </DialogTitle>
-                <DialogActions>
-                    <Button onClick={handleCloseLogoutPopUp} color="secondary">
+                <DialogActions className="!p-[20px]">
+                    <Button
+                        onClick={handleCloseLogoutPopUp}
+                        color="secondary"
+                        variant="outlined"
+                    >
                         No
                     </Button>
-                    <Button onClick={handleLogout} color="secondary" autoFocus>
+                    <Button
+                        onClick={handleLogout}
+                        color="secondary"
+                        variant="contained"
+                    >
                         Yes
                     </Button>
                 </DialogActions>

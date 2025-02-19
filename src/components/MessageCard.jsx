@@ -17,7 +17,7 @@ import {
     default as messageService,
     default as MessageService,
 } from '../services/MessageService';
-import { formatLocalTime } from '../utils/formatTime';
+import { formatLocalTime, getHours } from '../utils/formatTime';
 import { tranferFileSize } from '../utils/tranferFileSize';
 import SingleAvatar from './common/SingleAvatar';
 import ReadUserAvatars from './ReadUserAvatars';
@@ -110,159 +110,182 @@ function MessageCard({ data, isYour, presentAvt, viewImg, isLast }) {
                             <SingleAvatar data={data.user} size={'s'} />
                         </div>
                     )}
-                    {data.active && data.type === 'text' && (
-                        <p
-                            className={` max-w-[50%] p-[4px_10px]  text-white break-word ${
-                                isYour
-                                    ? 'rounded-[20px_20px_0_20px] bg-[var(--primary)]'
-                                    : 'rounded-[0_20px_20px_20px] bg-[var(--third)]'
-                            } 
-                            ${!isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'}
-                            `}
-                        >
-                            {data.content}
-                        </p>
-                    )}
+                    <div
+                        className={`max-w-[50%] p-[10px_10px_2px_10px] ${
+                            isYour
+                                ? 'rounded-[20px_20px_0_20px] bg-[var(--orange)]'
+                                : 'rounded-[0_20px_20px_20px] bg-[var(--primary)]'
+                        } 
+                            ${!isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'}`}
+                    >
+                        {data.active && data.type === 'text' && (
+                            <p className={`text-white break-word`}>
+                                {data.content}
+                            </p>
+                        )}
 
-                    {data.active && data.type === 'image' && (
-                        <img
-                            src={data.file.url}
-                            className={`max-w-[50%] w-auto max-h-[200px] rounded-xl cursor-pointer ${
-                                !isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'
-                            } border-[2px] border-[var(--primary)]`}
-                            onClick={() => viewImg(data)}
-                        />
-                    )}
+                        {data.active && data.type === 'image' && (
+                            <img
+                                src={data.file.url}
+                                className={`w-auto max-h-[200px] rounded-xl cursor-pointer }`}
+                                onClick={() => viewImg(data)}
+                            />
+                        )}
 
-                    {data.active && data.type === 'audio' && (
-                        <div
-                            className={`p-[4px_4px] max-w-[50%]  text-white break-word ${
-                                isYour
-                                    ? 'rounded-[40px_40px_0_40px] bg-[var(--primary)]'
-                                    : 'rounded-[0_40px_40px_40px] bg-[var(--third)]'
-                            } 
-                            ${!isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'}
+                        {data.active && data.type === 'audio' && (
+                            <div
+                                className={`p-[4px_4px] text-white break-word 
+                                    rounded-[16px]
+                                    ${
+                                        isYour
+                                            ? 'bg-[var(--fourth)]'
+                                            : 'bg-[var(--third)]'
+                                    } 
                             `}
-                        >
-                            <audio
+                            >
+                                <audio
+                                    controls
+                                    className={`max-w-[100%] h-[40px] ${
+                                        isYour ? 'primary-audio' : 'third-audio'
+                                    }`}
+                                >
+                                    <source
+                                        src={data.file.url}
+                                        type="audio/ogg"
+                                    />
+                                    <source
+                                        src={data.file.url}
+                                        type="audio/mpeg"
+                                    />
+                                </audio>
+                            </div>
+                        )}
+
+                        {data.active && data.type === 'voice' && (
+                            <div
+                                id={`message_${data.id}`}
+                                className={`flex overflow-hidden p-[10px] text-white break-word 
+                                    rounded-[16px]
+                                    ${
+                                        isYour
+                                            ? ' bg-[var(--fourth)]'
+                                            : 'bg-[var(--third)]'
+                                    } 
+                            `}
+                            >
+                                <IconButton
+                                    onClick={(e) => {
+                                        if (!isPlaying) wavesurfer.play();
+                                        else wavesurfer.pause();
+                                    }}
+                                    className="!w-[40px] !h-[40px] mr-[20px]"
+                                >
+                                    {!isPlaying && (
+                                        <PlayCircleIcon className="text-[#4236a3] !text-[2rem]" />
+                                    )}
+                                    {isPlaying && (
+                                        <PauseCircleIcon className="text-[#4236a3] !text-[2rem]" />
+                                    )}
+                                </IconButton>
+
+                                <WavesurferPlayer
+                                    width={waveWidth}
+                                    height={40}
+                                    normalize
+                                    waveColor="#3ec5b7"
+                                    url={data.file.url}
+                                    progressColor={'#4236a3'}
+                                    onReady={onReady}
+                                    onPlay={() => setIsPlaying(true)}
+                                    onPause={() => setIsPlaying(false)}
+                                />
+                            </div>
+                        )}
+
+                        {data.active && data.type === 'video' && (
+                            <video
                                 controls
-                                className={`max-w-[100%] h-[40px] ${
-                                    isYour ? 'primary-audio' : 'third-audio'
+                                className={`w-auto max-h-[200px] rounded-xl ${
+                                    !isYour && !presentAvt
+                                        ? 'ml-[36px]'
+                                        : 'ml-1'
+                                } border-[2px] border-[var(--primary)]`}
+                            >
+                                <source src={data.file.url} type="video/mp4" />
+                            </video>
+                        )}
+
+                        {data.active && data.type === 'file' && (
+                            <a
+                                href={data.file.downloadUrl}
+                                className={`flex items-center p-[4px_10px]  text-white break-word rounded-[12px] ${
+                                    isYour
+                                        ? 'bg-[var(--fourth)]'
+                                        : 'bg-[var(--third)]'
+                                } 
+                            `}
+                            >
+                                <div className="relative w-[60px]">
+                                    <InsertDriveFileIcon className="text-purple-500 !text-[4rem]" />
+                                    <p className="absolute top-[50%] right-[50%] translate-x-[50%] text-[0.8rem]">
+                                        {
+                                            data.file.originalName.split('.')[
+                                                data.file.originalName.split(
+                                                    '.'
+                                                ).length - 1
+                                            ]
+                                        }
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p
+                                        className={`text-[1rem] ${
+                                            isYour
+                                                ? 'text-white'
+                                                : 'text-[var(--primary)]'
+                                        } max-w-[100px]  lg:max-w-[200px] xl:max-w-[300px] truncate`}
+                                    >
+                                        {data.file.originalName}
+                                    </p>
+                                    <p
+                                        className={`${
+                                            isYour
+                                                ? 'text-[white]'
+                                                : 'text-[var(--primary)]'
+                                        } text-[0.8rem]`}
+                                    >
+                                        {tranferFileSize(data.file.size)}
+                                    </p>
+                                </div>
+                            </a>
+                        )}
+
+                        {!data.active && (
+                            <p
+                                className={`bg-transparent p-[4px_10px] text-[var(--purple-light)] border-[var(--purple-light)] border-[1px] ${
+                                    isYour
+                                        ? 'rounded-[20px_20px_0_20px]'
+                                        : 'rounded-[0_20px_20px_20px] '
                                 }`}
                             >
-                                <source src={data.file.url} type="audio/ogg" />
-                                <source src={data.file.url} type="audio/mpeg" />
-                            </audio>
-                        </div>
-                    )}
-
-                    {data.active && data.type === 'voice' && (
-                        <div
-                            id={`message_${data.id}`}
-                            className={`flex overflow-hidden p-[10px] text-white break-word ${
-                                isYour
-                                    ? 'rounded-[40px_40px_0_40px] bg-[var(--primary)]'
-                                    : 'rounded-[0_40px_40px_40px] bg-[var(--third)]'
-                            } 
-                            ${!isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'}
-                            `}
-                        >
-                            <IconButton
-                                onClick={(e) => {
-                                    if (!isPlaying) wavesurfer.play();
-                                    else wavesurfer.pause();
-                                }}
-                                className="!w-[40px] !h-[40px] mr-[20px]"
-                            >
-                                {!isPlaying && (
-                                    <PlayCircleIcon className="text-[#4236a3] !text-[2rem]" />
-                                )}
-                                {isPlaying && (
-                                    <PauseCircleIcon className="text-[#4236a3] !text-[2rem]" />
-                                )}
-                            </IconButton>
-
-                            <WavesurferPlayer
-                                width={waveWidth}
-                                height={40}
-                                normalize
-                                waveColor="violet"
-                                url={data.file.url}
-                                progressColor={'#4236a3'}
-                                onReady={onReady}
-                                onPlay={() => setIsPlaying(true)}
-                                onPause={() => setIsPlaying(false)}
-                            />
-                        </div>
-                    )}
-
-                    {data.active && data.type === 'video' && (
-                        <video
-                            controls
-                            className={`max-w-[50%] w-auto max-h-[200px] rounded-xl ${
-                                !isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'
-                            } border-[2px] border-[var(--primary)]`}
-                        >
-                            <source src={data.file.url} type="video/mp4" />
-                        </video>
-                    )}
-
-                    {data.active && data.type === 'file' && (
-                        <a
-                            href={data.file.downloadUrl}
-                            className={`flex items-center max-w-[50%] p-[4px_10px]  text-white break-word ${
-                                isYour
-                                    ? 'rounded-[20px_20px_0_20px] bg-[var(--primary)]'
-                                    : 'rounded-[0_20px_20px_20px] bg-[var(--third)]'
-                            } 
-                            ${!isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'}
-                            `}
-                        >
-                            <div className="relative w-[60px]">
-                                <InsertDriveFileIcon className="text-purple-500 !text-[4rem]" />
-                                <p className="absolute top-[50%] right-[50%] translate-x-[50%] text-[0.8rem]">
-                                    {
-                                        data.file.originalName.split('.')[
-                                            data.file.originalName.split('.')
-                                                .length - 1
-                                        ]
-                                    }
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-[1rem] text-blue-900 max-w-[100px]  lg:max-w-[200px] xl:max-w-[300px] truncate">
-                                    {data.file.originalName}
-                                </p>
-                                <p className="text-[var(--third)] text-[0.8rem]">
-                                    {tranferFileSize(data.file.size)}
-                                </p>
-                            </div>
-                        </a>
-                    )}
-
-                    {!data.active && (
-                        <p
-                            className={`bg-[#dbd7f9] max-w-[50%] p-[4px_10px] text-[var(--primary)] border-[var(--primary)] border-[1px] ${
-                                isYour
-                                    ? 'rounded-[20px_20px_0_20px]'
-                                    : 'rounded-[0_20px_20px_20px] '
-                            }
-                            ${!isYour && !presentAvt ? 'ml-[36px]' : 'ml-1'}`}
-                        >
-                            {isYour
-                                ? `You unsent a ${
-                                      data.type === 'text'
-                                          ? 'message'
-                                          : data.type
-                                  }`
-                                : `${data.user.name} unsent a ${
-                                      data.type === 'text'
-                                          ? 'message'
-                                          : data.type
-                                  }`}
+                                {isYour
+                                    ? `You unsent a ${
+                                          data.type === 'text'
+                                              ? 'message'
+                                              : data.type
+                                      }`
+                                    : `${data.user.name} unsent a ${
+                                          data.type === 'text'
+                                              ? 'message'
+                                              : data.type
+                                      }`}
+                            </p>
+                        )}
+                        <p className="text-right text-[0.8rem] text-[var(--purple-light)]">
+                            {getHours(data.createdAt)}
                         </p>
-                    )}
+                    </div>
 
                     {isHover && isYour && (
                         <div

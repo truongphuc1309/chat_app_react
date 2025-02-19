@@ -11,6 +11,8 @@ import SendVerification from './pages/SendVerification';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Gate from './pages/Gate';
+import AppProvider from './contexts/AppContext';
+import ChangePassword from './pages/ChangePassword';
 
 function App() {
     return (
@@ -20,6 +22,14 @@ function App() {
                 <Route path="/c" element={<Home />}>
                     <Route path=":id" element={<Home />} />
                 </Route>
+                <Route
+                    path="/change-password"
+                    element={
+                        <AppProvider>
+                            <ChangePassword />
+                        </AppProvider>
+                    }
+                />
                 <Route path="/login" element={<Login />}></Route>
                 <Route path="/register" element={<Register />}></Route>
                 <Route path="/verify-email" element={<VerifyEmail />}>

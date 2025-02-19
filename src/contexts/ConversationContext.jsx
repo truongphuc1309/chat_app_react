@@ -6,9 +6,10 @@ import { useAppContext } from './AppContext';
 export const ConversationContext = createContext({});
 
 function ConversationProvider({ children }) {
-    const { accessToken } = useAppContext();
+    const { accessToken, socket } = useAppContext();
     const { id } = useParams();
     const [data, setData] = useState(null);
+    const [subscription, setSubscription] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const getConversationInfo = async () => {
@@ -25,6 +26,18 @@ function ConversationProvider({ children }) {
 
     useEffect(() => {
         getConversationInfo();
+
+        if (subscription) subscription.unsubscribe();
+        setSubscription(
+            socket.subscribe(`/topic/conversation/${id}`, (mess) => {
+                const message = JSON.parse(mess.body);
+                setData(message);
+            })
+        );
+
+        return () => {
+            if (subscription) subscription.unsubscribe();
+        };
     }, [id]);
     return (
         <ConversationContext.Provider

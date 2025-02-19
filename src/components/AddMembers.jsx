@@ -15,12 +15,16 @@ import { useParams } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
 import conversationService from '../services/ConversationService';
 import userService from '../services/UserService';
+import CircularProgress from '@mui/material/CircularProgress';
+import { useConversationContext } from '../contexts/ConversationContext';
+import { data } from 'autoprefixer';
 
 function AddMembers({ members, open, close }) {
     const { id } = useParams();
     const [memberIds, setMemberIds] = useState([]);
-    const { user, accessToken } = useAppContext();
+    const { user, accessToken, socket } = useAppContext();
     const [options, setOptions] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [selectedMemberIds, setSelectedMemberIds] = useState([]);
 
     useEffect(() => {
@@ -58,13 +62,33 @@ function AddMembers({ members, open, close }) {
 
     const handleSubmit = async (e) => {
         if (selectedMemberIds.length > 0) {
-            selectedMemberIds.forEach(async (e) => {
-                await conversationService.addMember({
-                    token: accessToken,
-                    conversationId: id,
-                    userId: e,
-                });
-            });
+            setLoading(true);
+            const promises = selectedMemberIds.map(
+                async (e) =>
+                    await conversationService.addMember({
+                        token: accessToken,
+                        conversationId: id,
+                        userId: e,
+                    })
+            );
+            let result = await Promise.all(promises);
+            result = result[0];
+            if (result.success) {
+                socket.send(
+                    '/app/conversation/change-data',
+                    {},
+                    JSON.stringify(result.metaData)
+                );
+
+                socket.send(
+                    '/app/conversation',
+                    {},
+                    JSON.stringify(result.metaData)
+                );
+            }
+
+            setLoading(false);
+            close();
         }
     };
 
@@ -79,7 +103,10 @@ function AddMembers({ members, open, close }) {
                 },
             }}
         >
-            <DialogTitle id="alert-dialog-title" className="text-center">
+            <DialogTitle
+                id="alert-dialog-title"
+                className="text-center text-[var(--primary)]"
+            >
                 Add members
             </DialogTitle>
             <DialogContent>
@@ -99,7 +126,7 @@ function AddMembers({ members, open, close }) {
                             }}
                             {...params}
                             label="Select Members"
-                            color="secondary"
+                            color="primary"
                         />
                     )}
                     onChange={handleChangeValue}
@@ -107,11 +134,26 @@ function AddMembers({ members, open, close }) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button color="secondary" onClick={(e) => close()}>
+                <Button
+                    color="primary"
+                    variant="outlined"
+                    onClick={(e) => close()}
+                >
                     Close
                 </Button>
-                <Button color="success" onClick={handleSubmit}>
-                    Create
+                <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={handleSubmit}
+                >
+                    {loading && (
+                        <CircularProgress
+                            color="inherit"
+                            size={'2rem'}
+                            className="mr-2"
+                        />
+                    )}
+                    Add
                 </Button>
             </DialogActions>
         </Dialog>

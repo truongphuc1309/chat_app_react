@@ -88,6 +88,21 @@ class UserService {
                 )
         );
     };
+
+    static changePassword = async ({ token, currentPassword, newPassword }) => {
+        return await handleApiResponse(
+            async () =>
+                await apiUrl.post(
+                    'user/change-password',
+                    { currentPassword, newPassword },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                )
+        );
+    };
 }
 
 export default UserService;
