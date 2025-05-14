@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Selenium 
+/selenium/selenium_env
+/selenium/.pytest_cache
+
 # dependencies
 /node_modules
 /.pnp

@@ -128,6 +128,7 @@ function SideBarHeader() {
         <div className="flex relative justify-between items-center p-[10px_0]">
             {!search && (
                 <IconButton
+                    id="menu-button"
                     variant="text"
                     color="secondary"
                     sx={{
@@ -217,6 +218,7 @@ function SideBarHeader() {
                             />
                         </ListItemButton>
                         <ListItemButton
+                            id="logout-button"
                             className="border-t-[2px_!important]"
                             onClick={handleOpenLogoutPopUp}
                         >
@@ -317,6 +319,7 @@ function SideBarHeader() {
                         No
                     </Button>
                     <Button
+                        id="confirm-logout-button"
                         onClick={handleLogout}
                         color="secondary"
                         variant="contained"

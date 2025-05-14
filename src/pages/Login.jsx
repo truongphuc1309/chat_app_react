@@ -66,6 +66,7 @@ function Login() {
                     Log In
                 </h1>
                 <TextField
+                    id="email"
                     label="Email"
                     fullWidth
                     size="normal"
@@ -80,6 +81,7 @@ function Login() {
                     }}
                 />
                 <TextField
+                    id="password"
                     label="Password"
                     fullWidth
                     size="normal"
@@ -94,6 +96,7 @@ function Login() {
                     }}
                 />
                 <Button
+                    id="login-button"
                     type="submit"
                     className="w-[100%] h-[46px]"
                     variant="contained"

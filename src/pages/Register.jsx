@@ -104,6 +104,7 @@ function Register() {
                     Register
                 </h1>
                 <TextField
+                    id="email"
                     label="Email"
                     fullWidth
                     size="normal"
@@ -117,6 +118,7 @@ function Register() {
                     }}
                 />
                 <TextField
+                    id="name"
                     label="Full Name"
                     fullWidth
                     size="normal"
@@ -130,6 +132,7 @@ function Register() {
                     }}
                 />
                 <TextField
+                    id="password"
                     label="Password"
                     fullWidth
                     size="normal"
@@ -143,6 +146,7 @@ function Register() {
                     }}
                 />
                 <TextField
+                    id="confirm-password"
                     label="Confirm Password"
                     fullWidth
                     size="normal"
@@ -157,6 +161,7 @@ function Register() {
                 />
 
                 <Button
+                    id="register-button"
                     type="submit"
                     className="w-[100%] h-[46px]"
                     variant="contained"
@@ -196,6 +201,7 @@ function Register() {
                 </div>
             </form>
             <Dialog
+                id="success-register-dialog"
                 open={openEmailPopUp}
                 // onClose={() => setOpenDeletePopUp(false)}
                 aria-labelledby="alert-dialog-title"
