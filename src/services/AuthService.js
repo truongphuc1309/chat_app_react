@@ -23,7 +23,7 @@ class AuthService {
         );
     };
 
-    static logOut = async (token) => {
+    static logOut = async (acessToken, refreshToken) => {
         return await handleApiResponse(
             async () =>
                 await apiUrl.post(
@@ -31,7 +31,8 @@ class AuthService {
                     {},
                     {
                         headers: {
-                            'x-param': token,
+                            'x-param': acessToken,
+                            'y-param': refreshToken,
                         },
                     }
                 )

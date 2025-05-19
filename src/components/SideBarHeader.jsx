@@ -91,8 +91,10 @@ function SideBarHeader() {
     };
 
     const handleLogout = async (e) => {
-        const result = await authService.logOut(cookies.token);
-        console.log(result);
+        const result = await authService.logOut(
+            cookies.token,
+            cookies.refresh_token
+        );
         if (result.success == true) {
             removeCookie('token', { path: '/' });
             removeCookie('refresh_token', { path: '/' });
